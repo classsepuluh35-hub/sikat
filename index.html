@@ -26,14 +26,31 @@
         canvas {
             touch-action: none; /* Mencegah scrolling browser saat menggambar tanda tangan di HP */
         }
+        /* Kolom "No" & "Nama" (berisi NIS/NISN) dibuat sticky di tabel Rincian Siswa
+           (Wali Kelas & Wali Guru) supaya tidak ikut bergeser saat kolom Tanggal
+           yang banyak digeser/discroll ke kanan. Elemen/kelas baru, tidak mengubah
+           style/kelas lain yang sudah berjalan. */
+        .sikat-sticky-no {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background-color: #fff;
+        }
+        .sikat-sticky-nama {
+            position: sticky;
+            left: 2rem; /* selaras dengan lebar kolom No (w-8 = 2rem) */
+            z-index: 5;
+            background-color: #fff;
+            box-shadow: 2px 0 4px -2px rgba(0,0,0,0.12);
+        }
         @media print {
             body * {
                 visibility: hidden;
             }
-            #printArea, #printArea * {
+            #printArea, #printArea *, #wgPrintArea, #wgPrintArea * {
                 visibility: visible;
             }
-            #printArea {
+            #printArea, #wgPrintArea {
                 position: absolute;
                 left: 0;
                 top: 0;
@@ -66,7 +83,11 @@
         <section id="loginScreen" class="flex flex-col justify-center py-8">
             <div class="text-center mb-8">
                 <!-- Status Mode Database Badge -->
-                <div class="flex justify-center mb-4">
+                <!-- Disembunyikan dari tampilan (permintaan: sembunyikan "SPREADSHEET ACTIVE").
+                     Elemen tetap ada di DOM (class="hidden") supaya detectEnvironment() di
+                     script bawah tetap berjalan apa adanya tanpa error, hanya visualnya
+                     yang disembunyikan -- tidak ada logika JS yang diubah. -->
+                <div class="hidden flex justify-center mb-4">
                     <span id="dbModeBadge" class="px-3 py-1.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700 flex items-center gap-1.5 shadow-sm border border-amber-200">
                         <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> MENGHUBUNGKAN...
                     </span>
@@ -74,7 +95,7 @@
                 
                 <!-- Logo Placeholder -->
                 <div class="w-28 h-28 mx-auto bg-white rounded-3xl shadow-lg flex items-center justify-center border border-slate-100 overflow-hidden mb-4 p-4">
-                    <img src="https://i.ibb.co/L9HmhRz/logo-placeholder.png" alt="Logo ADMINKITA" class="max-w-full max-h-full object-contain" onerror="this.onerror=null; this.src='https://placehold.co/150x150/6366f1/ffffff?text=ADMINKITA';">
+                    <img src="data:image/png;base64,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" alt="Logo SMA Negeri 1 Parung Kabupaten Bogor" class="max-w-full max-h-full object-contain">
                 </div>
                 <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">SIKAT @2026</h2>
                 <p class="text-xs text-slate-400 mt-1">Sistem Administrasi Kelas Terintegrasi</p>
@@ -94,16 +115,16 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                 <div id="loginFormContainer">
                     <div class="mb-4">
-                        <label id="loginUserLabel" class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Nomor Induk Siswa (NIS)</label>
+                        <label id="loginUserLabel" class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Nomor Induk Siswa Nasional (NISN)</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                                 <i class="fa-solid fa-id-card"></i>
                             </span>
-                            <input type="text" id="loginUsername" placeholder="Masukkan NIS Anda" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs transition-all">
+                            <input type="text" id="loginUsername" placeholder="Masukkan NISN Anda" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs transition-all">
                         </div>
                     </div>
                     <div class="mb-6">
-                        <label id="loginPassLabel" class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Password (NIS)</label>
+                        <label id="loginPassLabel" class="block text-[10px] font-bold uppercase text-slate-500 mb-2">Password (NISN)</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                                 <i class="fa-solid fa-key"></i>
@@ -202,6 +223,8 @@
                                     <option value="Izin">Izin</option>
                                     <option value="Alfa">Alfa</option>
                                     <option value="Pulang Cepat">Pulang Cepat</option>
+                                    <option value="Bolos">Bolos</option>
+                                    <option value="Izin Terlambat">Izin Terlambat</option>
                                 </select>
                             </div>
                         </div>
@@ -211,34 +234,42 @@
                     </div>
 
                     <!-- Cards Tampilan Hasil Rekapan -->
-                    <div class="grid grid-cols-3 sm:grid-cols-7 gap-1.5 pt-2">
-                        <div class="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl text-center">
+                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-1.5 pt-2">
+                        <div onclick="showAbsenStatusPopup('Hadir Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Hadir) || [])" class="bg-emerald-50 text-emerald-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block">HADIR</span>
                             <span id="rekapHadir" class="text-base font-black mt-1 block">0</span>
                         </div>
-                        <div class="bg-yellow-50 text-yellow-700 p-2.5 rounded-xl text-center">
+                        <div onclick="showAbsenStatusPopup('Terlambat Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Terlambat) || [])" class="bg-yellow-50 text-yellow-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block">LATE</span>
                             <span id="rekapTerlambat" class="text-base font-black mt-1 block">0</span>
                         </div>
-                        <div class="bg-blue-50 text-blue-700 p-2.5 rounded-xl text-center">
+                        <div onclick="showAbsenStatusPopup('Dispen Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Dispen) || [])" class="bg-blue-50 text-blue-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block">DISPEN</span>
                             <span id="rekapDispen" class="text-base font-black mt-1 block">0</span>
                         </div>
-                        <div class="bg-amber-50 text-amber-700 p-2.5 rounded-xl text-center">
+                        <div onclick="showAbsenStatusPopup('Sakit Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Sakit) || [])" class="bg-amber-50 text-amber-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block">SAKIT</span>
                             <span id="rekapSakit" class="text-base font-black mt-1 block">0</span>
                         </div>
-                        <div class="bg-purple-50 text-purple-700 p-2.5 rounded-xl text-center">
+                        <div onclick="showAbsenStatusPopup('Izin Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Izin) || [])" class="bg-purple-50 text-purple-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block">IZIN</span>
                             <span id="rekapIzin" class="text-base font-black mt-1 block">0</span>
                         </div>
-                        <div class="bg-rose-50 text-rose-700 p-2.5 rounded-xl text-center">
+                        <div onclick="showAbsenStatusPopup('Alfa Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Alfa) || [])" class="bg-rose-50 text-rose-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block">ALFA</span>
                             <span id="rekapAlfa" class="text-base font-black mt-1 block">0</span>
                         </div>
-                        <div class="bg-orange-50 text-orange-700 p-2.5 rounded-xl text-center">
+                        <div onclick="showAbsenStatusPopup('Pulang Cepat Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.PulangCepat) || [])" class="bg-orange-50 text-orange-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase truncate">P. Cepat</span>
                             <span id="rekapPulangCepat" class="text-base font-black mt-1 block">0</span>
+                        </div>
+                        <div onclick="showAbsenStatusPopup('Bolos Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.Bolos) || [])" class="bg-red-50 text-red-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
+                            <span class="text-[8px] font-bold block uppercase">BOLOS</span>
+                            <span id="rekapBolos" class="text-base font-black mt-1 block">0</span>
+                        </div>
+                        <div onclick="showAbsenStatusPopup('Izin Terlambat Hari Ini', (window.homeAbsenByStatusToday && homeAbsenByStatusToday.IzinTerlambat) || [])" class="bg-cyan-50 text-cyan-700 p-2.5 rounded-xl text-center cursor-pointer active:scale-95 transition">
+                            <span class="text-[8px] font-bold block uppercase truncate">Izin T.</span>
+                            <span id="rekapIzinTerlambat" class="text-base font-black mt-1 block">0</span>
                         </div>
                     </div>
 
@@ -272,28 +303,7 @@
 
                     <!-- 1. JURNAL GURU HADIR -->
                     <div id="containerJurnalHadir" class="space-y-4">
-                        <!-- Upload Foto Bukti Pembelajaran -->
-                        <div id="siswaUploadSection" class="flex flex-col items-center justify-center mb-6 w-full">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Upload Foto Pembelajaran Kelas (PNG, JPG)</span>
-                            <div class="w-full border-2 border-dashed border-slate-200 hover:border-indigo-500 rounded-2xl p-4 bg-slate-50 transition-all text-center relative cursor-pointer" id="siswaFotoUploadArea">
-                                <input type="file" id="siswaFotoUpload" accept="image/png, image/jpeg" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                                <div id="siswaUploadPlaceholder" class="space-y-1.5 py-4">
-                                    <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto shadow-sm">
-                                        <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
-                                    </div>
-                                    <p class="text-xs font-semibold text-slate-600">Klik atau seret foto ke area ini</p>
-                                    <p class="text-[9px] text-slate-400">Hanya file PNG, JPG, JPEG</p>
-                                </div>
-                                <div id="siswaUploadPreviewContainer" class="hidden">
-                                    <img id="siswaUploadPreview" class="w-full rounded-xl object-cover aspect-video mb-2 border border-slate-100" src="" alt="Bukti Foto Kelas">
-                                    <div class="flex justify-between items-center px-1">
-                                        <span class="text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Foto Siap Kirim</span>
-                                        <button type="button" id="btnHapusSiswaFoto" class="text-[10px] text-rose-500 hover:text-rose-600 hover:underline font-bold">Hapus</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
+                    
                         <!-- Form Isi Jurnal -->
                         <div class="space-y-4">
                             <div class="grid grid-cols-2 gap-3">
@@ -312,7 +322,9 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mata Pelajaran</label>
-                                    <input type="text" id="jurnalMapel" placeholder="Contoh: Pemrograman Web" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                    <select id="jurnalMapel" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                        <option value="">-- Pilih Mata Pelajaran --</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jam Ke-</label>
@@ -401,7 +413,9 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mata Pelajaran</label>
-                                <input type="text" id="jurnalMapelTh" placeholder="Contoh: Pemrograman Web" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                <select id="jurnalMapelTh" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                    <option value="">-- Pilih Mata Pelajaran --</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jam Ke-</label>
@@ -492,6 +506,8 @@
                                 <span><b>I</b>:Izin</span>
                                 <span><b>A</b>:Alfa</span>
                                 <span><b>PC</b>:P.Cepat</span>
+                                <span><b>B</b>:Bolos</span>
+                                <span><b>IT</b>:Izin Terlambat</span>
                             </div>
                         </div>
                         
@@ -520,7 +536,7 @@
 
                         <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
                             <span class="text-[8px] font-bold text-indigo-600 tracking-widest uppercase block mb-1">Wali Kelas</span>
-                            <h4 class="font-bold text-slate-800 text-xs" id="strWali">Suyanso, S.Pd I</h4>
+                            <h4 class="font-bold text-slate-800 text-xs" id="strWali">-</h4>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
@@ -627,40 +643,50 @@
                     <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wide">
                         <i class="fa-solid fa-chart-line text-indigo-600 mr-1.5"></i> Rekapan Absen Kelas Binaan
                     </h4>
-                    <div class="grid grid-cols-3 sm:grid-cols-7 gap-1.5 text-center">
-                        <div class="bg-emerald-50 text-emerald-700 p-2 rounded-2xl">
+                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-1.5 text-center">
+                        <div onclick="showAbsenStatusPopup('Hadir Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Hadir) || [])" class="bg-emerald-50 text-emerald-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase">Hadir</span>
                             <span id="wkRekapHadir" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
-                        <div class="bg-yellow-50 text-yellow-700 p-2 rounded-2xl">
+                        <div onclick="showAbsenStatusPopup('Terlambat Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Terlambat) || [])" class="bg-yellow-50 text-yellow-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase">Late</span>
                             <span id="wkRekapTerlambat" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
-                        <div class="bg-blue-50 text-blue-700 p-2 rounded-2xl">
+                        <div onclick="showAbsenStatusPopup('Dispen Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Dispen) || [])" class="bg-blue-50 text-blue-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase">Dispen</span>
                             <span id="wkRekapDispen" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
-                        <div class="bg-amber-50 text-amber-700 p-2 rounded-2xl">
+                        <div onclick="showAbsenStatusPopup('Sakit Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Sakit) || [])" class="bg-amber-50 text-amber-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase">Sakit</span>
                             <span id="wkRekapSakit" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
-                        <div class="bg-purple-50 text-purple-700 p-2 rounded-2xl">
+                        <div onclick="showAbsenStatusPopup('Izin Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Izin) || [])" class="bg-purple-50 text-purple-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase">Izin</span>
                             <span id="wkRekapIzin" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
-                        <div class="bg-rose-50 text-rose-700 p-2 rounded-2xl">
+                        <div onclick="showAbsenStatusPopup('Alfa Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Alfa) || [])" class="bg-rose-50 text-rose-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase">Alfa</span>
                             <span id="wkRekapAlfa" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
-                        <div class="bg-orange-50 text-orange-700 p-2 rounded-2xl">
+                        <div onclick="showAbsenStatusPopup('Pulang Cepat Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.PulangCepat) || [])" class="bg-orange-50 text-orange-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
                             <span class="text-[8px] font-bold block uppercase truncate">P. Cepat</span>
                             <span id="wkRekapPulangCepat" class="text-sm font-black block mt-0.5">0</span>
+                            <span class="text-[8px] font-medium block">kali</span>
+                        </div>
+                        <div onclick="showAbsenStatusPopup('Bolos Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.Bolos) || [])" class="bg-red-50 text-red-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
+                            <span class="text-[8px] font-bold block uppercase">Bolos</span>
+                            <span id="wkRekapBolos" class="text-sm font-black block mt-0.5">0</span>
+                            <span class="text-[8px] font-medium block">kali</span>
+                        </div>
+                        <div onclick="showAbsenStatusPopup('Izin Terlambat Hari Ini', (window.waliAbsenByStatusToday && waliAbsenByStatusToday.IzinTerlambat) || [])" class="bg-cyan-50 text-cyan-700 p-2 rounded-2xl cursor-pointer active:scale-95 transition">
+                            <span class="text-[8px] font-bold block uppercase truncate">Izin T.</span>
+                            <span id="wkRekapIzinTerlambat" class="text-sm font-black block mt-0.5">0</span>
                             <span class="text-[8px] font-medium block">kali</span>
                         </div>
                     </div>
@@ -701,6 +727,8 @@
                                 <option value="Izin">Izin</option>
                                 <option value="Alfa">Alfa</option>
                                 <option value="Pulang Cepat">Pulang Cepat</option>
+                                <option value="Bolos">Bolos</option>
+                                <option value="Izin Terlambat">Izin Terlambat</option>
                             </select>
                         </div>
                     </div>
@@ -728,7 +756,7 @@
                         </div>
 
                         <!-- Rekapan Summary untuk Cetakan PDF -->
-                        <div class="grid grid-cols-7 gap-1 text-[8px] text-center font-bold">
+                        <div class="grid grid-cols-3 sm:grid-cols-9 gap-1 text-[8px] text-center font-bold">
                             <div class="bg-emerald-50 text-emerald-700 p-1 rounded-lg">Hadir: <span id="wkTotalHadir">0</span></div>
                             <div class="bg-yellow-50 text-yellow-700 p-1 rounded-lg">T: <span id="wkTotalTerlambat">0</span></div>
                             <div class="bg-blue-50 text-blue-700 p-1 rounded-lg">Dispen: <span id="wkTotalDispen">0</span></div>
@@ -736,21 +764,19 @@
                             <div class="bg-purple-50 text-purple-700 p-1 rounded-lg">Izin: <span id="wkTotalIzin">0</span></div>
                             <div class="bg-rose-50 text-rose-700 p-1 rounded-lg">Alfa: <span id="wkTotalAlfa">0</span></div>
                             <div class="bg-orange-50 text-orange-700 p-1 rounded-lg">PC: <span id="wkTotalPulangCepat">0</span></div>
+                            <div class="bg-red-50 text-red-700 p-1 rounded-lg">Bolos: <span id="wkTotalBolos">0</span></div>
+                            <div class="bg-cyan-50 text-cyan-700 p-1 rounded-lg">IT: <span id="wkTotalIzinTerlambat">0</span></div>
                         </div>
 
                         <!-- Laporan Tabel Hasil Deteksi -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs">
-                                <thead>
+                                <thead id="wkSosenTableHead">
                                     <tr class="border-b border-slate-100 text-slate-400 text-[10px]">
-                                        <th class="py-2">Nama Siswa</th>
-                                        <th class="py-2 text-center">H</th>
-                                        <th class="py-2 text-center">T</th>
-                                        <th class="py-2 text-center">D</th>
-                                        <th class="py-2 text-center">S</th>
-                                        <th class="py-2 text-center">I</th>
-                                        <th class="py-2 text-center">A</th>
-                                        <th class="py-2 text-center">PC</th>
+                                        <th class="py-2 w-8 sikat-sticky-no">No</th>
+                                        <th class="py-2 sikat-sticky-nama">Nama</th>
+                                        <th class="py-2">Tanggal</th>
+                                        <th class="py-2 text-center">Hadir</th>
                                     </tr>
                                 </thead>
                                 <tbody id="wkSosenTable" class="divide-y divide-slate-100">
@@ -1086,6 +1112,8 @@
                                         <option value="Izin">Izin</option>
                                         <option value="Alfa">Alfa</option>
                                         <option value="Pulang Cepat">Pulang Cepat</option>
+                                        <option value="Bolos">Bolos</option>
+                                        <option value="Izin Terlambat">Izin Terlambat</option>
                                     </select>
                                 </div>
                             </div>
@@ -1095,10 +1123,52 @@
                             </button>
                         </div>
 
-                        <!-- Card Riwayat Hasil Pencarian Kehadiran Terperinci -->
-                        <div class="space-y-2">
-                            <h5 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider">Histori Laporan Kehadiran</h5>
-                            <div id="wgFilteredAbsenResults" class="space-y-2 max-h-[220px] overflow-y-auto pr-1"></div>
+                        <!-- Print & Table Container (format disamakan dengan Rincian Siswa Kelas Binaan Wali Kelas) -->
+                        <div class="bg-white p-4 rounded-2xl border border-slate-100 space-y-3">
+                            <div class="flex justify-between items-center no-print">
+                                <h5 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider">Rincian Siswa Binaan</h5>
+                                <button id="wgPrintAbsenBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] px-3 py-2 rounded-xl flex items-center gap-1 shadow transition transform active:scale-95 uppercase">
+                                    <i class="fa-solid fa-print"></i> Cetak Laporan
+                                </button>
+                            </div>
+
+                            <!-- Printable Area Wrapper -->
+                            <div id="wgPrintArea" class="space-y-4">
+                                <div class="hidden print:block text-center border-b pb-4 mb-4">
+                                    <h2 class="text-xl font-extrabold text-slate-800">ADMINKITA @2026</h2>
+                                    <p class="text-xs text-slate-555">Laporan Rekapitulasi Absensi Siswa Binaan</p>
+                                    <p id="wgPrintClassAndDate" class="text-xs font-bold text-slate-800 mt-1"></p>
+                                </div>
+
+                                <!-- Rekapan Summary untuk Cetakan PDF -->
+                                <div class="grid grid-cols-3 sm:grid-cols-9 gap-1 text-[8px] text-center font-bold">
+                                    <div class="bg-emerald-50 text-emerald-700 p-1 rounded-lg">Hadir: <span id="wgTotalHadir">0</span></div>
+                                    <div class="bg-yellow-50 text-yellow-700 p-1 rounded-lg">T: <span id="wgTotalTerlambat">0</span></div>
+                                    <div class="bg-blue-50 text-blue-700 p-1 rounded-lg">Dispen: <span id="wgTotalDispen">0</span></div>
+                                    <div class="bg-amber-50 text-amber-700 p-1 rounded-lg">Sakit: <span id="wgTotalSakit">0</span></div>
+                                    <div class="bg-purple-50 text-purple-700 p-1 rounded-lg">Izin: <span id="wgTotalIzin">0</span></div>
+                                    <div class="bg-rose-50 text-rose-700 p-1 rounded-lg">Alfa: <span id="wgTotalAlfa">0</span></div>
+                                    <div class="bg-orange-50 text-orange-700 p-1 rounded-lg">PC: <span id="wgTotalPulangCepat">0</span></div>
+                                    <div class="bg-red-50 text-red-700 p-1 rounded-lg">Bolos: <span id="wgTotalBolos">0</span></div>
+                                    <div class="bg-cyan-50 text-cyan-700 p-1 rounded-lg">IT: <span id="wgTotalIzinTerlambat">0</span></div>
+                                </div>
+
+                                <!-- Laporan Tabel Hasil Deteksi -->
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-xs">
+                                        <thead id="wgSosenTableHead">
+                                            <tr class="border-b border-slate-100 text-slate-400 text-[10px]">
+                                                <th class="py-2 w-8 sikat-sticky-no">No</th>
+                                                <th class="py-2 sikat-sticky-nama">Nama</th>
+                                                <th class="py-2">Tanggal</th>
+                                                <th class="py-2 text-center">Hadir</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="wgSosenTable" class="divide-y divide-slate-100">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1547,6 +1617,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 laporan_hasil_mata_pelajaran: [],
                 penanganan: [],
                 struktur: [
+                    { id: "XI-RPL-1-waliKelas", kelas: "XI-RPL-1", jabatan: "Wali Kelas", nis: "", nama: "Retno Wahyuningsih, S.Pd" },
                     { id: "XI-RPL-1-ketua", kelas: "XI-RPL-1", jabatan: "Ketua Kelas", nis: "12345", nama: "Ahmad Randy" },
                     { id: "XI-RPL-1-wakil", kelas: "XI-RPL-1", jabatan: "Wakil Ketua Kelas", nis: "12348", nama: "Bagas Saputra" },
                     { id: "XI-RPL-1-sekretaris1", kelas: "XI-RPL-1", jabatan: "Sekretaris 1", nis: "12346", nama: "Bella Anggraini" },
@@ -1580,6 +1651,25 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const getLocalTable = (key) => JSON.parse(localStorage.getItem('ADMIN_DB_' + key.toUpperCase()));
             const saveLocalTable = (key, data) => localStorage.setItem('ADMIN_DB_' + key.toUpperCase(), JSON.stringify(data));
 
+            // Menyamakan format ID (NIS/NISN/NIP) sebelum dibandingkan saat login,
+            // agar angka nol di depan (mis. "0012345678") tidak menyebabkan gagal login.
+            // Juga membuang karakter tak terlihat (spasi non-standar / zero-width).
+            const normalizeLoginId = (value) => {
+                let str = (value === null || value === undefined) ? '' : value.toString();
+                str = str.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
+                if (/^\d+$/.test(str)) {
+                    const stripped = str.replace(/^0+/, '');
+                    return stripped === '' ? '0' : stripped;
+                }
+                return str;
+            };
+
+            // Menyamakan Role (tidak sensitif huruf besar/kecil & spasi berlebih)
+            const normalizeRole = (value) => {
+                let str = (value === null || value === undefined) ? '' : value.toString();
+                return str.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim().toLowerCase();
+            };
+
             // Pola Proksi GAS Mock
             class GASMockProxy {
                 constructor(onSuccess, onFailure) {
@@ -1587,7 +1677,11 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                     this.onFailure = onFailure;
                 }
                 authenticate(username, password, role) {
-                    const matched = getLocalTable('users').find(u => u.username === username && u.password === password && u.role === role);
+                    const matched = getLocalTable('users').find(u =>
+                        normalizeLoginId(u.username) === normalizeLoginId(username) &&
+                        normalizeLoginId(u.password) === normalizeLoginId(password) &&
+                        normalizeRole(u.role) === normalizeRole(role)
+                    );
                     matched ? this.onSuccess(matched) : this.onFailure("ID Pengguna atau Password salah!");
                 }
                 getSiswaByKelas(kelas) {
@@ -1617,6 +1711,11 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 }
                 getAttendanceForGuruWali(guruWaliName) {
                     const allSiswa = getLocalTable('siswa').filter(s => s.guru_wali === guruWaliName);
+                    const listNis = allSiswa.map(s => s.nis.toString().trim());
+                    this.onSuccess(getLocalTable('absen').filter(a => listNis.includes(a.nis.toString().trim())));
+                }
+                getAttendanceForWaliKelas(waliKelasName) {
+                    const allSiswa = getLocalTable('siswa').filter(s => s.wali_kelas === waliKelasName);
                     const listNis = allSiswa.map(s => s.nis.toString().trim());
                     this.onSuccess(getLocalTable('absen').filter(a => listNis.includes(a.nis.toString().trim())));
                 }
@@ -1762,30 +1861,139 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
         let uploadedFotoWkBase64 = null;
         let uploadedFotoWgBase64 = null;
 
+        // ==========================================================================
+        // KONEKSI KE SPREADSHEET ASLI SAAT DI-HOSTING DI LUAR GOOGLE APPS SCRIPT
+        // (mis. GitHub Pages). Isi URL Web App Apps Script kamu di sini supaya
+        // aplikasi tetap membaca/menulis ke Spreadsheet sungguhan, bukan localStorage.
+        //
+        // Cara mendapatkan URL:
+        //   1. Buka project Apps Script kamu.
+        //   2. Deploy > New deployment > pilih tipe "Web app".
+        //   3. "Execute as": Me. "Who has access": Anyone.
+        //   4. Deploy, lalu salin URL yang berakhiran /exec ke bawah ini.
+        //
+        // Kalau dikosongkan (""), aplikasi otomatis jalan pakai simulator
+        // lokal (localStorage) seperti sebelumnya -- cocok untuk sekadar demo UI.
+        // ==========================================================================
+        const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzMVM25YJ2M2tFQJTo_X3ZdIgbK8R_-s5nUuEydUtkQt0ciFB6ZWBSV-BDeiOAnpOJX/exec";
+
         const runBackend = (methodName, args = [], onSuccess, onFailure) => {
             const isRealGAS = (typeof google !== 'undefined' && google.script && google.script.run && typeof google.script.run[methodName] === 'function');
+
             if (isRealGAS) {
+                // Kondisi normal: file ini dijalankan langsung dari dalam Apps Script.
                 google.script.run
                     .withSuccessHandler(onSuccess)
                     .withFailureHandler(onFailure || (err => alertModal("Error", err.message)))
                     [methodName](...args);
-            } else {
-                try {
-                    const res = window.google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onFailure)[methodName](...args);
-                } catch (e) {
-                    if (onFailure) onFailure(e);
-                    else alertModal("Sistem Error", e.message);
-                }
+                return;
             }
+
+            if (APPS_SCRIPT_WEB_APP_URL) {
+                // Di-hosting di luar GAS (mis. GitHub Pages) TAPI sudah dikonfigurasi
+                // untuk memanggil Web App Apps Script via fetch -> data sungguhan.
+                fetch(APPS_SCRIPT_WEB_APP_URL, {
+                    method: 'POST',
+                    // Sengaja TIDAK diberi header 'Content-Type: application/json' agar
+                    // termasuk "simple request" dan tidak memicu preflight CORS (OPTIONS),
+                    // karena Apps Script Web App tidak menangani OPTIONS request.
+                    body: JSON.stringify({ method: methodName, args: args })
+                })
+                    .then(res => res.text().then(rawText => ({ res, rawText })))
+                    .then(({ res, rawText }) => {
+                        let json;
+                        try {
+                            json = JSON.parse(rawText);
+                        } catch (parseErr) {
+                            // Respons BUKAN JSON valid -- biasanya karena Apps Script
+                            // membalas halaman HTML (mis. minta login) alih-alih menjalankan
+                            // doPost. Tampilkan potongan respons asli supaya mudah didiagnosis,
+                            // plus dugaan penyebab paling umum.
+                            const looksLikeHtml = /^\s*</.test(rawText);
+                            const snippet = rawText.substring(0, 200);
+                            const hint = looksLikeHtml
+                                ? "Respons berupa HTML, bukan JSON -- biasanya berarti deployment Web App belum di-set 'Anyone' bisa akses, atau URL yang dipakai bukan yang berakhiran /exec, atau deployment belum di-deploy ulang sebagai versi baru setelah update Code.gs."
+                                : "Respons tidak bisa dibaca sebagai JSON.";
+                            const errMsg = "Gagal membaca respons Web App (status HTTP " + res.status + "). " + hint + "\n\nPotongan respons asli:\n" + snippet;
+                            if (onFailure) onFailure({ message: errMsg });
+                            else alertModal("Koneksi Gagal", errMsg);
+                            return;
+                        }
+
+                        if (json && json.ok) {
+                            onSuccess(json.data);
+                        } else {
+                            const errMsg = (json && json.error) ? json.error : "Terjadi kesalahan pada server.";
+                            if (onFailure) onFailure({ message: errMsg });
+                            else alertModal("Error", errMsg);
+                        }
+                    })
+                    .catch(err => {
+                        const errMsg = "Gagal menghubungi Web App: " + err.message + ". Pastikan URL benar, deployment diset 'Anyone' bisa mengakses, dan sudah versi terbaru.";
+                        if (onFailure) onFailure({ message: errMsg });
+                        else alertModal("Koneksi Gagal", errMsg);
+                    });
+                return;
+            }
+
+            // Fallback: tidak ada koneksi GAS ataupun Web App URL -> pakai simulator
+            // data lokal (localStorage) yang di-inject di atas.
+            try {
+                const res = window.google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onFailure)[methodName](...args);
+            } catch (e) {
+                if (onFailure) onFailure(e);
+                else alertModal("Sistem Error", e.message);
+            }
+        };
+
+        // Menjalankan beberapa panggilan backend yang SALING BEBAS (tidak
+        // saling bergantung) secara PARALEL, bukan berurutan. Ini penting
+        // untuk kecepatan: sebelumnya banyak layar memanggil misalnya
+        // getSiswaByKelas lalu BARU setelah itu selesai memanggil getGuruList,
+        // padahal keduanya sama sekali tidak butuh hasil satu sama lain --
+        // itu membuang waktu 2x round-trip padahal cukup 1x (yang terlama).
+        //
+        // Pemakaian:
+        //   runBackendAll([
+        //       { method: 'getSiswaByKelas', args: [kelas] },
+        //       { method: 'getGuruList', args: [] }
+        //   ], function(results) {
+        //       const [classSiswa, gList] = results;
+        //       ...
+        //   });
+        const runBackendAll = (tasks, onSuccess, onFailure) => {
+            const results = new Array(tasks.length);
+            let remaining = tasks.length;
+            let failed = false;
+            if (remaining === 0) { onSuccess(results); return; }
+            tasks.forEach((t, i) => {
+                runBackend(t.method, t.args || [], (data) => {
+                    if (failed) return;
+                    results[i] = data;
+                    remaining--;
+                    if (remaining === 0) onSuccess(results);
+                }, (err) => {
+                    if (failed) return;
+                    failed = true;
+                    if (onFailure) onFailure(err);
+                    else alertModal("Error", (err && err.message) ? err.message : String(err));
+                });
+            });
         };
 
         function detectEnvironment() {
             const dbBadge = document.getElementById('dbModeBadge');
             const isRealGAS = (typeof google !== 'undefined' && google.script && google.script.run && !window.google.script.run.authenticate); // check if mock proxy is injected
-            
+
             if (isRealGAS) {
                 if (dbBadge) {
                     dbBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span> SPREADSHEET ACTIVE';
+                    dbBadge.className = "px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-600/20 text-emerald-600 flex items-center gap-1.5 shadow-sm border border-emerald-200/50";
+                }
+                return true;
+            } else if (APPS_SCRIPT_WEB_APP_URL) {
+                if (dbBadge) {
+                    dbBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span> SPREADSHEET (REMOTE)';
                     dbBadge.className = "px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-600/20 text-emerald-600 flex items-center gap-1.5 shadow-sm border border-emerald-200/50";
                 }
                 return true;
@@ -2093,9 +2301,9 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             currentRole = "Siswa";
             document.getElementById('roleSiswaTab').className = "flex-1 py-3 text-center text-xs font-semibold rounded-xl bg-indigo-600 text-white shadow-md transition-all";
             document.getElementById('roleGuruTab').className = "flex-1 py-3 text-center text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-800 transition-all";
-            document.getElementById('loginUserLabel').textContent = "Nomor Induk Siswa (NIS)";
-            document.getElementById('loginPassLabel').textContent = "Password (NIS)";
-            document.getElementById('loginUsername').placeholder = "Masukkan NIS Anda";
+            document.getElementById('loginUserLabel').textContent = "Nomor Induk Siswa Nasional (NISN)";
+            document.getElementById('loginPassLabel').textContent = "Password (NISN)";
+            document.getElementById('loginUsername').placeholder = "Masukkan NISN Anda";
         });
 
         document.getElementById('roleGuruTab').addEventListener('click', () => {
@@ -2131,7 +2339,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 setupSiswaDashboard();
             } else {
                 showLoading(true);
-                runBackend('getSiswaByWaliKelas', [currentUser.name], function(homeroomStudents) {
+                runBackend('resolveWaliKelasStudents', [currentUser.name, currentUser.class_or_nip], function(homeroomStudents) {
                     showLoading(false);
                     currentUser.isActualWaliKelas = (homeroomStudents && homeroomStudents.length > 0);
                     
@@ -2157,7 +2365,11 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
 
         function onLoginFail(errorMsg) {
             showLoading(false);
-            alertModal("Login Gagal", errorMsg || "Periksa kembali identitas login Anda.");
+            // errorMsg bisa berupa string, objek Error (dari google.script.run),
+            // atau objek biasa { message: "..." } (dari fetch ke Web App) --
+            // ambil teksnya secara aman supaya tidak pernah tampil "[object Object]".
+            var text = (errorMsg && typeof errorMsg === 'object' && errorMsg.message) ? errorMsg.message : errorMsg;
+            alertModal("Login Gagal", text || "Periksa kembali identitas login Anda.");
         }
 
         document.getElementById('logoutBtnSiswa').addEventListener('click', performLogout);
@@ -2182,12 +2394,14 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             document.getElementById('absenKelasDisplay').value = currentUser.class_or_nip;
 
             showLoading(true);
-            runBackend('getSiswaByKelas', [currentUser.class_or_nip], function(classSiswa) {
-                runBackend('getGuruList', [], function(gList) {
-                    showLoading(false);
-                    processSiswaData(classSiswa);
-                    populateGuruOptions(gList);
-                });
+            runBackendAll([
+                { method: 'getSiswaByKelas', args: [currentUser.class_or_nip] },
+                { method: 'getGuruList', args: [] }
+            ], function(results) {
+                const [classSiswa, gList] = results;
+                showLoading(false);
+                processSiswaData(classSiswa);
+                populateGuruOptions(gList);
             });
         }
 
@@ -2219,21 +2433,75 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 selectGuruTh.innerHTML += optionHtml;
             });
 
+            // Reset dropdown Mata Pelajaran ke kondisi awal (menunggu Guru dipilih)
+            resetMapelSelect();
+
             selectGuru.addEventListener('change', () => {
                 const selectedOpt = selectGuru.options[selectGuru.selectedIndex];
                 const nip = selectedOpt ? (selectedOpt.getAttribute('data-nip') || '') : '';
-                const mapel = selectedOpt ? (selectedOpt.getAttribute('data-mapel') || '') : '';
                 document.getElementById('jurnalNip').value = nip;
-                document.getElementById('jurnalMapel').value = mapel;
+                updateMapelSelectByGuru(nip, 'jurnalMapel', gList);
             });
 
             selectGuruTh.addEventListener('change', () => {
                 const selectedOpt = selectGuruTh.options[selectGuruTh.selectedIndex];
                 const nip = selectedOpt ? (selectedOpt.getAttribute('data-nip') || '') : '';
-                const mapel = selectedOpt ? (selectedOpt.getAttribute('data-mapel') || '') : '';
                 document.getElementById('jurnalNipTh').value = nip;
-                document.getElementById('jurnalMapelTh').value = mapel;
+                updateMapelSelectByGuru(nip, 'jurnalMapelTh', gList);
             });
+        }
+
+        // Mengatur dropdown Mata Pelajaran (jurnalMapel & jurnalMapelTh) ke kondisi
+        // awal sebelum Guru dipilih. Jika targetId diisi, hanya select tersebut yang
+        // direset (agar tidak mengganggu form lain yang sedang diisi).
+        function resetMapelSelect(targetId) {
+            const placeholder = '<option value="">-- Pilih Guru terlebih dahulu --</option>';
+            const ids = targetId ? [targetId] : ['jurnalMapel', 'jurnalMapelTh'];
+            ids.forEach(id => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                select.innerHTML = placeholder;
+                select.disabled = true;
+            });
+        }
+
+        // Mengisi dropdown Mata Pelajaran berdasarkan Guru yang dipilih (dicocokkan lewat NIP).
+        // - Jika guru tersebut mengampu LEBIH DARI SATU mata pelajaran -> tampil sebagai
+        //   dropdown aktif berisi pilihan mapel guru tersebut, siswa wajib memilih.
+        // - Jika guru tersebut hanya mengampu SATU mata pelajaran -> otomatis terisi
+        //   dan dropdown dikunci (tidak perlu/tidak bisa dipilih manual).
+        // Catatan: satu guru bisa punya >1 mapel baik karena (a) muncul di beberapa baris
+        // data guru dengan NIP yang sama, maupun (b) mapel ditulis digabung dalam satu
+        // kolom (mis. "Matematika, Fisika"). Keduanya ditangani di sini.
+        function updateMapelSelectByGuru(nip, targetId, gList) {
+            const select = document.getElementById(targetId);
+
+            if (!nip) {
+                resetMapelSelect(targetId);
+                return;
+            }
+
+            const mapelSet = new Set();
+            gList.filter(g => g.nip === nip && g.mapel).forEach(g => {
+                g.mapel.split(/[,;/&]+|\bdan\b/i).map(m => m.trim()).filter(Boolean).forEach(m => mapelSet.add(m));
+            });
+            const mapelGuru = [...mapelSet];
+
+            if (mapelGuru.length > 1) {
+                // Guru mengajar lebih dari satu mapel -> jadikan dropdown pilihan
+                let optionsHtml = '<option value="">-- Pilih Mata Pelajaran --</option>';
+                mapelGuru.forEach(m => {
+                    optionsHtml += `<option value="${m}">${m}</option>`;
+                });
+                select.innerHTML = optionsHtml;
+                select.disabled = false;
+            } else {
+                // Guru hanya mengajar satu mapel -> otomatis terisi, tidak berupa pilihan dropdown
+                const singleMapel = mapelGuru[0] || '';
+                select.innerHTML = singleMapel ? `<option value="${singleMapel}">${singleMapel}</option>` : '<option value="">-</option>';
+                select.value = singleMapel;
+                select.disabled = true;
+            }
         }
 
         window.switchAktivitasSubTab = function(type) {
@@ -2312,12 +2580,14 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const targetClass = currentUser.class_or_nip;
             
             showLoading(true);
-            runBackend('getSiswaByKelas', [targetClass], function(classSiswa) {
-                runBackend('getAttendanceByClass', [targetClass], function(attendanceRecords) {
-                    showLoading(false);
-                    const dayRecords = attendanceRecords.filter(a => a.tanggal === tgl && a.kelas === targetClass);
-                    renderAttendanceList(classSiswa, dayRecords);
-                });
+            runBackendAll([
+                { method: 'getSiswaByKelas', args: [targetClass] },
+                { method: 'getAttendanceByClass', args: [targetClass] }
+            ], function(results) {
+                const [classSiswa, attendanceRecords] = results;
+                showLoading(false);
+                const dayRecords = attendanceRecords.filter(a => a.tanggal === tgl && a.kelas === targetClass);
+                renderAttendanceList(classSiswa, dayRecords);
             });
         };
 
@@ -2381,6 +2651,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             document.getElementById('jurnalGuru').value = '';
             document.getElementById('jurnalNip').value = '';
             document.getElementById('jurnalMapel').value = '';
+            resetMapelSelect('jurnalMapel');
             document.getElementById('jurnalJamMasuk').value = '';
             document.getElementById('jurnalJamKeluar').value = '';
             document.getElementById('jurnalJamKe').value = '';
@@ -2505,6 +2776,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             document.getElementById('jurnalGuruTh').value = '';
             document.getElementById('jurnalNipTh').value = '';
             document.getElementById('jurnalMapelTh').value = '';
+            resetMapelSelect('jurnalMapelTh');
             document.getElementById('jurnalJamKeTh').value = '';
             document.getElementById('jurnalAlasanTh').value = '';
             document.getElementById('jurnalAlasanThLainnya').value = '';
@@ -2572,6 +2844,14 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                                 <label class="flex items-center gap-1 px-1.5 py-1.5 bg-white border border-slate-200 rounded-xl cursor-pointer text-[10px] font-bold hover:bg-slate-100 flex-1 justify-center min-w-[36px]">
                                     <input type="radio" name="absen-${s.nis}" value="Pulang Cepat" ${isPC ? 'checked' : ''} onchange="handleAbsenRadioChange('${s.nis}', 'Pulang Cepat')" class="accent-orange-600">
                                     <span class="text-orange-700 text-[8px]">PC</span>
+                                </label>
+                                <label class="flex items-center gap-1 px-1.5 py-1.5 bg-white border border-slate-200 rounded-xl cursor-pointer text-[10px] font-bold hover:bg-slate-100 flex-1 justify-center min-w-[36px]">
+                                    <input type="radio" name="absen-${s.nis}" value="Bolos" ${!isPC && currentStatus === 'Bolos' ? 'checked' : ''} onchange="handleAbsenRadioChange('${s.nis}', 'Bolos')" class="accent-red-600">
+                                    <span class="text-red-700 text-[9px]">B</span>
+                                </label>
+                                <label class="flex items-center gap-1 px-1.5 py-1.5 bg-white border border-slate-200 rounded-xl cursor-pointer text-[10px] font-bold hover:bg-slate-100 flex-1 justify-center min-w-[36px]">
+                                    <input type="radio" name="absen-${s.nis}" value="Izin Terlambat" ${!isPC && currentStatus === 'Izin Terlambat' ? 'checked' : ''} onchange="handleAbsenRadioChange('${s.nis}', 'Izin Terlambat')" class="accent-cyan-600">
+                                    <span class="text-cyan-700 text-[8px]">IT</span>
                                 </label>
                             </div>
                         </div>
@@ -2644,6 +2924,23 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             showLoading(true);
             runBackend('getAttendanceByClass', [targetClass], function(allRecords) {
                 showLoading(false);
+
+                // Kelompokkan absensi HARI INI saja (untuk popup saat kartu rekap diklik),
+                // terpisah dari hasil filter tanggal/nama/status pada panel filter.
+                const todayStr = new Date().toISOString().split('T')[0];
+                const recordsToday = allRecords.filter(r => r.tanggal === todayStr);
+                window.homeAbsenByStatusToday = {
+                    Hadir: recordsToday.filter(r => r.status === 'Hadir'),
+                    Terlambat: recordsToday.filter(r => r.status === 'Terlambat'),
+                    Dispen: recordsToday.filter(r => r.status === 'Dispen'),
+                    Sakit: recordsToday.filter(r => r.status === 'Sakit'),
+                    Izin: recordsToday.filter(r => r.status === 'Izin'),
+                    Alfa: recordsToday.filter(r => r.status === 'Alfa'),
+                    PulangCepat: recordsToday.filter(r => r.status.startsWith('Pulang Cepat')),
+                    Bolos: recordsToday.filter(r => r.status === 'Bolos'),
+                    IzinTerlambat: recordsToday.filter(r => r.status === 'Izin Terlambat')
+                };
+
                 applyClientFilters(allRecords, fromDate, null, textKeyword, filterStatus);
             });
         }
@@ -2664,7 +2961,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 filtered = filtered.filter(r => r.status.startsWith(status));
             }
 
-            let h = 0, t = 0, d = 0, s = 0, i = 0, a = 0, pc = 0;
+            let h = 0, t = 0, d = 0, s = 0, i = 0, a = 0, pc = 0, b = 0, itc = 0;
             filtered.forEach(record => {
                 if (record.status === 'Hadir') h++;
                 else if (record.status === 'Terlambat') t++;
@@ -2673,6 +2970,8 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 else if (record.status === 'Izin') i++;
                 else if (record.status === 'Alfa') a++;
                 else if (record.status.startsWith('Pulang Cepat')) pc++;
+                else if (record.status === 'Bolos') b++;
+                else if (record.status === 'Izin Terlambat') itc++;
             });
 
             document.getElementById('rekapHadir').textContent = h;
@@ -2682,6 +2981,8 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             document.getElementById('rekapIzin').textContent = i;
             document.getElementById('rekapAlfa').textContent = a;
             document.getElementById('rekapPulangCepat').textContent = pc;
+            document.getElementById('rekapBolos').textContent = b;
+            document.getElementById('rekapIzinTerlambat').textContent = itc;
 
             renderHomeSearchResults(filtered);
         }
@@ -2705,6 +3006,8 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 else if (r.status === 'Sakit') badgeClass = "bg-amber-50 text-amber-700";
                 else if (r.status === 'Izin') badgeClass = "bg-purple-50 text-purple-700";
                 else if (r.status === 'Alfa') badgeClass = "bg-rose-50 text-rose-700";
+                else if (r.status === 'Bolos') badgeClass = "bg-red-50 text-red-700";
+                else if (r.status === 'Izin Terlambat') badgeClass = "bg-cyan-50 text-cyan-700";
                 else if (r.status.startsWith('Pulang Cepat')) {
                     badgeClass = "bg-orange-50 text-orange-700";
                     statusLabel = "Pulang Cepat";
@@ -2742,6 +3045,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
 
         function renderStructureUI(structData) {
             const elements = {
+                'Wali Kelas': 'strWali',
                 'Ketua Kelas': 'strKetua',
                 'Wakil Ketua Kelas': 'strWakil',
                 'Sekretaris 1': 'strSekretaris1',
@@ -2802,6 +3106,10 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             }
 
             if (currentUser.isActualWaliKelas) {
+                // Catatan: tanggal filter TIDAK di-prefill "hari ini" lagi, supaya
+                // Rekapan Absen Kelas Binaan (Beranda Guru Wali) menghitung seluruh
+                // data absen kelas binaan (tanpa batas tanggal), sama seperti cara
+                // Rekapan Absen Kelas di Beranda Siswa menghitung datanya.
                 document.getElementById('wkFilterStartDate').value = today;
                 document.getElementById('wkFilterEndDate').value = today;
 
@@ -2813,7 +3121,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 document.getElementById('addGuruKelas').value = targetClass;
 
                 showLoading(true);
-                runBackend('getSiswaByWaliKelas', [currentUser.name], function(classSiswa) {
+                runBackend('resolveWaliKelasStudents', [currentUser.name, currentUser.class_or_nip], function(classSiswa) {
                     showLoading(false);
                     const psSelect = document.getElementById('psNamaSiswa');
                     if (psSelect) {
@@ -3031,6 +3339,23 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             });
         }
 
+        // Fungsi baru khusus untuk memformat tanggal (yyyy-MM-dd) menjadi format
+        // Indonesia yang mudah dibaca pada tabel Cetak Laporan, contoh: "15 Agustus 2026".
+        // Fungsi ini berdiri sendiri dan tidak mengubah logika/kode lain yang sudah berjalan.
+        function formatTanggalIndo(tanggalStr) {
+            if (!tanggalStr || tanggalStr === '-') return '-';
+            const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const parts = tanggalStr.toString().trim().split('-');
+            if (parts.length !== 3) return tanggalStr; // format tak dikenali, tampilkan apa adanya
+
+            const [y, m, d] = parts;
+            const bulanIndex = parseInt(m, 10) - 1;
+            const tanggalNum = parseInt(d, 10);
+            if (isNaN(bulanIndex) || bulanIndex < 0 || bulanIndex > 11 || isNaN(tanggalNum)) return tanggalStr;
+
+            return `${tanggalNum} ${bulanIndo[bulanIndex]} ${y}`;
+        }
+
         function renderWaliReports() {
             const targetClass = currentUser.class_or_nip;
             const filterStartDate = document.getElementById('wkFilterStartDate').value;
@@ -3039,11 +3364,76 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const filterStat = document.getElementById('wkFilterStatus').value;
 
             showLoading(true);
-            runBackend('getSiswaByWaliKelas', [currentUser.name], function(classSiswa) {
-                runBackend('getAttendanceByClass', [targetClass], function(attendanceRecords) {
-                    showLoading(false);
-                    processWaliReportsUI(classSiswa, attendanceRecords, filterStartDate, filterEndDate, filterSiswa, filterStat);
-                });
+            runBackendAll([
+                { method: 'resolveWaliKelasStudents', args: [currentUser.name, currentUser.class_or_nip] },
+                { method: 'getAttendanceByClass', args: [targetClass] },
+                { method: 'getAttendanceForGuruWali', args: [currentUser.name] },
+                { method: 'getSiswaByWaliKelas', args: [currentUser.name] },
+                { method: 'getAttendanceForWaliKelas', args: [currentUser.name] }
+            ], function(results) {
+                const [classSiswaResolved, attendanceByClass, attendanceByGuruWali, siswaByWaliKelas, attendanceByWaliKelas] = results;
+                showLoading(false);
+
+                // Gabungkan roster dari resolveWaliKelasStudents dengan siswa yang kolom
+                // 'wali_kelas'-nya diisi nama guru ini (getSiswaByWaliKelas). Ini perlu
+                // supaya siswa yang secara eksplisit punya wali kelas = guru ini tetap
+                // masuk hitungan, walaupun kolom 'kelas' siswa tsb tidak sama persis
+                // dengan kelas yang terdaftar pada akun guru. Dedupe berdasarkan nis.
+                const classSiswaMapByNis = new Map();
+                (classSiswaResolved || []).forEach(s => classSiswaMapByNis.set(s.nis, s));
+                (siswaByWaliKelas || []).forEach(s => classSiswaMapByNis.set(s.nis, s));
+                const classSiswa = Array.from(classSiswaMapByNis.values());
+
+                // Gabungkan data absen per-kelas (targetClass), data absen lintas kelas
+                // milik siswa binaan (guru_wali) — struktur/fitur Guru Wali Pembimbing
+                // yang sudah berjalan, tidak diubah — DITAMBAH data absen siswa yang
+                // wali_kelas-nya = guru ini (getAttendanceForWaliKelas), supaya semua
+                // siswa yang sudah diabsen tetap masuk ke Rekapan Absen Kelas Binaan
+                // Wali Kelas. Dedupe berdasarkan id supaya tidak dobel saat overlap.
+                const attendanceMapById = new Map();
+                (attendanceByClass || []).forEach(r => attendanceMapById.set(r.id, r));
+                (attendanceByGuruWali || []).forEach(r => attendanceMapById.set(r.id, r));
+                (attendanceByWaliKelas || []).forEach(r => attendanceMapById.set(r.id, r));
+                const attendanceRecords = Array.from(attendanceMapById.values());
+
+                // Kelompokkan absensi HARI INI saja untuk siswa kelas binaan (untuk popup kartu rekap),
+                // terpisah dari hasil filter tanggal/nama/status pada panel Filter Laporan Absensi.
+                const todayStr = new Date().toISOString().split('T')[0];
+                // FIX: Samakan format NIS (string + trim) sebelum dibandingkan.
+                // Sebelumnya Set.has(r.nis) dibandingkan langsung (strict equality),
+                // sehingga jika NIS dari data siswa dan data absensi berbeda tipe
+                // (angka vs teks) atau ada spasi tersisa, siswa yang SUDAH diabsen
+                // tidak ikut terhitung di Rekapan Absen Kelas Binaan (totalnya
+                // nyangkut/tidak pernah sama dengan jumlah siswa di kelas binaan).
+                // Tidak mengubah logika/alur lain yang sudah berjalan.
+                const nisBinaanToday = new Set(classSiswa.map(s => String(s.nis).trim()));
+                const recordsToday = attendanceRecords.filter(r => r.tanggal === todayStr && nisBinaanToday.has(String(r.nis).trim()));
+                window.waliAbsenByStatusToday = {
+                    Hadir: recordsToday.filter(r => r.status === 'Hadir'),
+                    Terlambat: recordsToday.filter(r => r.status === 'Terlambat'),
+                    Dispen: recordsToday.filter(r => r.status === 'Dispen'),
+                    Sakit: recordsToday.filter(r => r.status === 'Sakit'),
+                    Izin: recordsToday.filter(r => r.status === 'Izin'),
+                    Alfa: recordsToday.filter(r => r.status === 'Alfa'),
+                    PulangCepat: recordsToday.filter(r => r.status.startsWith('Pulang Cepat')),
+                    Bolos: recordsToday.filter(r => r.status === 'Bolos'),
+                    IzinTerlambat: recordsToday.filter(r => r.status === 'Izin Terlambat')
+                };
+
+                // Kartu Rekapan Absen Kelas Binaan di Beranda SELALU menampilkan data
+                // HARI INI (recordsToday), tidak terikat filter Laporan Absensi di bawah
+                // (filter itu murni untuk kebutuhan cetak laporan periode tertentu).
+                document.getElementById('wkRekapHadir').textContent = window.waliAbsenByStatusToday.Hadir.length;
+                document.getElementById('wkRekapTerlambat').textContent = window.waliAbsenByStatusToday.Terlambat.length;
+                document.getElementById('wkRekapDispen').textContent = window.waliAbsenByStatusToday.Dispen.length;
+                document.getElementById('wkRekapSakit').textContent = window.waliAbsenByStatusToday.Sakit.length;
+                document.getElementById('wkRekapIzin').textContent = window.waliAbsenByStatusToday.Izin.length;
+                document.getElementById('wkRekapAlfa').textContent = window.waliAbsenByStatusToday.Alfa.length;
+                document.getElementById('wkRekapPulangCepat').textContent = window.waliAbsenByStatusToday.PulangCepat.length;
+                document.getElementById('wkRekapBolos').textContent = window.waliAbsenByStatusToday.Bolos.length;
+                document.getElementById('wkRekapIzinTerlambat').textContent = window.waliAbsenByStatusToday.IzinTerlambat.length;
+
+                processWaliReportsUI(classSiswa, attendanceRecords, filterStartDate, filterEndDate, filterSiswa, filterStat);
             });
         }
 
@@ -3065,42 +3455,120 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 siswaBinaanDisplay = classSiswa.filter(s => s.nama === siswaName);
             }
 
-            let gHadir = 0, gTerlambat = 0, gDispen = 0, gSakit = 0, gIzin = 0, gAlfa = 0, gPulangCepat = 0;
+            // Batasi absensi hanya untuk siswa kelas binaan yang sesuai filter Nama Siswa
+            // FIX: samakan format NIS (string + trim) supaya siswa yang sudah diabsen
+            // tidak hilang dari rekap/laporan hanya karena beda tipe data NIS (angka vs teks).
+            const nisBinaanSet = new Set(siswaBinaanDisplay.map(s => String(s.nis).trim()));
+            let recordsForBinaan = filteredAbsen.filter(a => nisBinaanSet.has(String(a.nis).trim()));
+
+            // Urutkan berdasarkan Tanggal lalu Nama agar rapi saat dicetak
+            recordsForBinaan.sort((a, b) => {
+                if (a.tanggal === b.tanggal) return a.nama.localeCompare(b.nama);
+                return a.tanggal.localeCompare(b.tanggal);
+            });
+
+            const statusColorMap = {
+                'H': 'text-emerald-600',
+                'T': 'text-yellow-600',
+                'D': 'text-blue-600',
+                'S': 'text-amber-600',
+                'I': 'text-purple-600',
+                'A': 'text-rose-600',
+                'PC': 'text-orange-600',
+                'B': 'text-red-600',
+                'IT': 'text-cyan-600'
+            };
+
+            // Ubah nama status menjadi kode satu/dua huruf untuk tabel cetak:
+            // A = Alfa, H = Hadir, S = Sakit, I = Izin, D = Dispen, T = Terlambat, PC = Pulang Cepat,
+            // B = Bolos, IT = Izin Terlambat
+            function statusKeKode(status) {
+                if (!status) return '-';
+                if (status.startsWith('Pulang Cepat')) return 'PC';
+                if (status === 'Hadir') return 'H';
+                if (status === 'Alfa') return 'A';
+                if (status === 'Sakit') return 'S';
+                if (status === 'Izin') return 'I';
+                if (status === 'Dispen') return 'D';
+                if (status === 'Terlambat') return 'T';
+                if (status === 'Bolos') return 'B';
+                if (status === 'Izin Terlambat') return 'IT';
+                return status.charAt(0).toUpperCase();
+            }
+
+            let gHadir = 0, gTerlambat = 0, gDispen = 0, gSakit = 0, gIzin = 0, gAlfa = 0, gPulangCepat = 0, gBolos = 0, gIzinTerlambat = 0;
+            recordsForBinaan.forEach(r => {
+                if (r.status === 'Hadir') gHadir++;
+                else if (r.status === 'Terlambat') gTerlambat++;
+                else if (r.status === 'Dispen') gDispen++;
+                else if (r.status === 'Sakit') gSakit++;
+                else if (r.status === 'Izin') gIzin++;
+                else if (r.status === 'Alfa') gAlfa++;
+                else if (r.status.startsWith('Pulang Cepat')) gPulangCepat++;
+                else if (r.status === 'Bolos') gBolos++;
+                else if (r.status === 'Izin Terlambat') gIzinTerlambat++;
+            });
+
+            // Daftar tanggal unik (urut) dari data yang sudah difilter -> jadi kolom-kolom di bawah header "Tanggal"
+            const tanggalUnik = [...new Set(recordsForBinaan.map(r => r.tanggal))].sort();
+
+            const thead = document.getElementById('wkSosenTableHead');
+            const kolomTanggalHTML = tanggalUnik.length
+                ? tanggalUnik.map(t => {
+                      const bagian = t.split('-');
+                      const labelHari = bagian.length === 3 ? parseInt(bagian[2], 10) : t;
+                      return `<th class="py-1 px-1.5 text-center font-bold">${labelHari}</th>`;
+                  }).join('')
+                : '<th class="py-1 px-1.5 text-center">-</th>';
+
+            thead.innerHTML = `
+                <tr class="border-b border-slate-100 text-slate-400 text-[10px]">
+                    <th class="py-2 w-8 sikat-sticky-no" rowspan="2">No</th>
+                    <th class="py-2 sikat-sticky-nama" rowspan="2">Nama</th>
+                    <th class="py-2 text-center" colspan="${tanggalUnik.length || 1}">Tanggal</th>
+                    <th class="py-2 px-1.5 text-center text-emerald-600" rowspan="2">Hadir</th>
+                </tr>
+                <tr class="border-b border-slate-100 text-slate-400 text-[9px]">
+                    ${kolomTanggalHTML}
+                </tr>
+            `;
+
             const tbody = document.getElementById('wkSosenTable');
             tbody.innerHTML = '';
 
-            siswaBinaanDisplay.forEach(s => {
-                let studentRecords = filteredAbsen.filter(a => a.nis === s.nis);
-                
-                let h = 0, t = 0, d = 0, sCount = 0, i = 0, a = 0, pc = 0;
-                studentRecords.forEach(r => {
-                    if (r.status === 'Hadir') h++;
-                    else if (r.status === 'Terlambat') t++;
-                    else if (r.status === 'Dispen') d++;
-                    else if (r.status === 'Sakit') sCount++;
-                    else if (r.status === 'Izin') i++;
-                    else if (r.status === 'Alfa') a++;
-                    else if (r.status.startsWith('Pulang Cepat')) pc++;
+            siswaBinaanDisplay.forEach((s, idx) => {
+                const recordsSiswaIni = recordsForBinaan.filter(r => String(r.nis).trim() === String(s.nis).trim());
+                const rekapPerTanggal = {};
+                recordsSiswaIni.forEach(r => {
+                    rekapPerTanggal[r.tanggal] = statusKeKode(r.status);
                 });
+                // Jumlah Hadir per siswa: total status "Hadir" sesuai filter yang aktif
+                const jumlahHadirSiswa = recordsSiswaIni.filter(r => r.status === 'Hadir').length;
 
-                gHadir += h; gTerlambat += t; gDispen += d; gSakit += sCount; gIzin += i; gAlfa += a; gPulangCepat += pc;
+                const selTanggalHTML = tanggalUnik.length
+                    ? tanggalUnik.map(t => {
+                          const kode = rekapPerTanggal[t] || '-';
+                          const warna = statusColorMap[kode] || 'text-slate-300';
+                          return `<td class="py-2 px-1.5 text-center font-bold ${warna}">${kode}</td>`;
+                      }).join('')
+                    : '<td class="py-2 px-1.5 text-center text-slate-300">-</td>';
 
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-100 hover:bg-slate-50/50 text-xs">
-                        <td class="py-3 font-semibold text-slate-800">
+                        <td class="py-3 text-center text-slate-500 font-semibold sikat-sticky-no">${idx + 1}</td>
+                        <td class="py-3 font-semibold text-slate-800 sikat-sticky-nama">
                             <div>${s.nama}</div>
                             <div class="text-[9px] text-slate-400 font-medium">NIS: ${s.nis}</div>
                         </td>
-                        <td class="py-3 text-center text-emerald-600 font-bold">${h}</td>
-                        <td class="py-3 text-center text-yellow-600 font-bold">${t}</td>
-                        <td class="py-3 text-center text-blue-600 font-bold">${d}</td>
-                        <td class="py-3 text-center text-amber-600 font-bold">${sCount}</td>
-                        <td class="py-3 text-center text-purple-600 font-bold">${i}</td>
-                        <td class="py-3 text-center text-rose-600 font-bold">${a}</td>
-                        <td class="py-3 text-center text-orange-600 font-bold">${pc}</td>
+                        ${selTanggalHTML}
+                        <td class="py-3 px-1.5 text-center font-extrabold text-emerald-600">${jumlahHadirSiswa}</td>
                     </tr>
                 `;
             });
+
+            if (siswaBinaanDisplay.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${(tanggalUnik.length || 1) + 3}" class="py-6 text-center text-slate-400 text-xs">Tidak ada data absensi sesuai filter.</td></tr>`;
+            }
 
             document.getElementById('wkTotalHadir').textContent = gHadir;
             document.getElementById('wkTotalTerlambat').textContent = gTerlambat;
@@ -3109,14 +3577,11 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             document.getElementById('wkTotalIzin').textContent = gIzin;
             document.getElementById('wkTotalAlfa').textContent = gAlfa;
             document.getElementById('wkTotalPulangCepat').textContent = gPulangCepat;
-
-            document.getElementById('wkRekapHadir').textContent = gHadir;
-            document.getElementById('wkRekapTerlambat').textContent = gTerlambat;
-            document.getElementById('wkRekapDispen').textContent = gDispen;
-            document.getElementById('wkRekapSakit').textContent = gSakit;
-            document.getElementById('wkRekapIzin').textContent = gIzin;
-            document.getElementById('wkRekapAlfa').textContent = gAlfa;
-            document.getElementById('wkRekapPulangCepat').textContent = gPulangCepat;
+            document.getElementById('wkTotalBolos').textContent = gBolos;
+            document.getElementById('wkTotalIzinTerlambat').textContent = gIzinTerlambat;
+            // Catatan: wkRekap* (kartu Beranda) TIDAK diisi di sini lagi — kartu itu
+            // selalu memakai data HARI INI yang di-set di renderWaliReports(), supaya
+            // tidak berubah mengikuti filter Laporan Absensi yang murni untuk cetak.
         }
 
         document.getElementById('wkPrintAbsenBtn').addEventListener('click', () => {
@@ -3125,7 +3590,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const endDate = document.getElementById('wkFilterEndDate').value || '-';
             const siswaSel = document.getElementById('wkFilterNamaSiswa').value;
             
-            pLabel.textContent = `Kelas: ${currentUser.class_or_nip} | Rentang: ${startDate} s/d ${endDate} | Siswa: ${siswaSel}`;
+            pLabel.textContent = `Kelas: ${currentUser.class_or_nip} | Rentang: ${formatTanggalIndo(startDate)} s/d ${formatTanggalIndo(endDate)} | Siswa: ${siswaSel}`;
             window.print();
         });
 
@@ -3144,12 +3609,325 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
         };
 
         // Render Laporan Nilas Siswa Kelas (Wali Kelas)
+        // FUNGSI BARU (dipakai bersama oleh renderWaliGrades() milik Wali Kelas
+        // dan renderWaliGuruWaliNilai() milik Wali Guru) supaya tampilan kartu
+        // "Laporan Hasil Mata Pelajaran" / "Rekap Hasil Studi Mapel" SAMA PERSIS
+        // di kedua menu, sesuai instruksi. Fungsi ini HANYA membangun potongan
+        // HTML kartu -- cara data diambil dari backend (getGradesByClass /
+        // getGradesForGuruWali, dipanggil di masing2 fungsi render) TIDAK diubah.
+        //
+        // Tata letak kartu:
+        //   Baris 1 (sejajar Nama)  : Nama siswa  |  label "Rata2 Nilai" + badge TUNTAS/TIDAK TUNTAS
+        //   Baris 2 (sejajar NIS)   : NIS: xxx + daftar mapel baku  |  header kolom TETAP: Tugas/UH/UTS/Poin
+        //   Baris 3 dst             : Nama Mapel  |  nilai per kolom (nilai bisa diklik -> popup rincian)
+        // Mapel yang nilainya kosong total (rata2 kosong) tidak ditampilkan.
+        //
+        // PERUBAHAN (permintaan guru wali, menu Nilai):
+        // 1) Header kolom di bawah "Rata2 Nilai" dibuat TETAP/fixed (Tugas, UH,
+        //    UTS, Poin) -- SELALU tampil keempatnya walau datanya belum diisi,
+        //    tidak lagi mengikuti param "headers" yang data-driven (dulu kolom
+        //    cuma muncul kalau ada datanya). Kolom "UH" tetap dibaca dari key
+        //    "Ulangan Harian" karena itu nama kategori asli hasil kategorikanJenisNilai_()
+        //    di backend (backend TIDAK diubah). Kolom "Poin" baru: menampilkan
+        //    poin_karakter siswa (field yang sama dipakai tombol "Poin Karakter"
+        //    di kartu Poin/openPoinModal), nilainya sama untuk semua baris mapel
+        //    karena memang poin per-siswa, bukan per-mapel.
+        // 2) Baris "Mapel: ..." di bawah NIS yang sebelumnya diambil dari data
+        //    (allSubjects) DIHAPUS, diganti daftar mapel BAKU/tetap (konstanta
+        //    DAFTAR_MAPEL_BAKU di bawah) -- silakan sunting isi array itu sesuai
+        //    kurikulum yang dipakai, tidak memengaruhi bagian lain.
+        // Param "headers" tetap diterima (tidak diubah signature-nya) supaya
+        // pemanggil (renderWaliGrades/renderWaliGuruWaliNilai) tidak perlu diubah,
+        // walau isinya sudah tidak dipakai lagi untuk membangun kolom di sini.
+        const DAFTAR_MAPEL_BAKU = [
+            'Pendidikan Agama Islam', 'Pendidikan Pancasila', 'Bahasa Indonesia',
+            'Matematika', 'Bahasa Inggris', 'Informatika', 'Sejarah', 'Seni Budaya',
+            'PJOK', 'Muatan Kejuruan'
+        ];
+        const KOLOM_NILAI_TETAP = [
+            { key: 'Tugas', label: 'Tugas' },
+            { key: 'Ulangan Harian', label: 'UH' },
+            { key: 'UTS', label: 'UTS' }
+        ];
+
+        // Bantu pencocokan nama mapel dari data (sheet 'nilai') dengan nama di
+        // DAFTAR_MAPEL_BAKU, supaya tidak gagal cocok cuma gara2 beda spasi/besar-kecil huruf.
+        const normalisasiNamaMapel = str => (str || '').toString().trim().toLowerCase();
+
+        // PERUBAHAN (permintaan guru wali, menu Nilai -- Laporan Hasil Mata
+        // Pelajaran): daftar mapel yang ditampilkan di kartu SEKARANG DIAMBIL
+        // OTOMATIS dari data nilai itu sendiri (field n.mapel pada tiap baris
+        // "data" hasil getGradesByClass/getGradesForGuruWali -- backend
+        // mengisinya dari kolom D "mapel" sheet 'nilai', lihat buildGradesResult_
+        // di kode.gs: rowMapel = rows[i][3]) -- BUKAN lagi dari array tetap
+        // DAFTAR_MAPEL_BAKU. Jadi begitu guru mapel menambahkan nilai untuk
+        // mapel yang belum pernah ada sebelumnya, mapel itu otomatis langsung
+        // muncul sebagai baris baru di kartu, tanpa perlu edit kode/array manual.
+        // Urutan mapel mengikuti urutan pertama kali mapel itu muncul di data
+        // (dedup case-insensitive/trim pakai normalisasiNamaMapel supaya satu
+        // mapel yang ditulis beda spasi/huruf besar-kecil tidak dobel jadi 2 baris).
+        // TIDAK mengubah cara backend mengambil/menghitung data nilai sama sekali.
+        function getDaftarMapelDinamis_(allNilai) {
+            const seen = {};
+            const list = [];
+            (allNilai || []).forEach(n => {
+                const m = (n.mapel || '').toString().trim();
+                if (!m) return;
+                const key = normalisasiNamaMapel(m);
+                if (!seen[key]) {
+                    seen[key] = true;
+                    list.push(m);
+                }
+            });
+            return list;
+        }
+
+        function buildAkademikCardHTML(s, headers, allNilai) {
+            const scores = allNilai.filter(n => n.nama.toLowerCase() === s.nama.toLowerCase());
+            const charPoints = scores.length > 0 ? (scores[0].poin_karakter !== undefined ? scores[0].poin_karakter : 100) : 100;
+
+            // Daftar mapel diambil otomatis dari data nilai (kolom D sheet
+            // 'nilai') -- lihat getDaftarMapelDinamis_() di atas. Kalau ada
+            // mapel baru ditambahkan lewat input nilai, otomatis muncul di sini.
+            const daftarMapel = getDaftarMapelDinamis_(allNilai);
+
+            // PERUBAHAN (permintaan guru wali, menu Nilai): baris mapel yang
+            // ditampilkan TIDAK LAGI diambil dari mapel yang ada datanya saja
+            // (dulu: allSubjects hasil dari data nilai, lalu difilter yang kosong
+            // dibuang). Sekarang SEMUA mapel di daftarMapel ditampilkan,
+            // berurut ke bawah sesuai urutan array itu. Suatu mapel "terisi" kalau
+            // nilai rata2 Tugas (atau kolom lain) untuk mapel itu ada datanya --
+            // ditampilkan sebagai angka yang bisa diklik; kalau belum ada data,
+            // tetap tampil sebagai baris mapel tapi selnya "-".
+            let isLengkapTotal = true;
+            daftarMapel.forEach(m => {
+                const sc = scores.find(n => normalisasiNamaMapel(n.mapel) === normalisasiNamaMapel(m)) || { grades: {} };
+                KOLOM_NILAI_TETAP.forEach(col => {
+                    const val = sc.grades[col.key];
+                    if (val === undefined || val === null || val === '') isLengkapTotal = false;
+                });
+            });
+
+            let tableRowsHTML = '';
+            daftarMapel.forEach(m => {
+                const sc = scores.find(n => normalisasiNamaMapel(n.mapel) === normalisasiNamaMapel(m)) || { grades: {} };
+                let cellsHTML = '';
+
+                KOLOM_NILAI_TETAP.forEach(col => {
+                    const val = sc.grades[col.key];
+                    const isMissing = (val === undefined || val === null || val === '');
+                    cellsHTML += isMissing
+                        ? `<td class="py-1.5 px-1 text-center"><span class="text-slate-300 font-bold">-</span></td>`
+                        : `<td class="py-1.5 px-1 text-center">
+                               <button type="button" onclick="showNilaiDetailPopup('${s.nama.replace(/'/g, "\\'")}', '${m.replace(/'/g, "\\'")}', '${col.key.replace(/'/g, "\\'")}', '${col.label.replace(/'/g, "\\'")}')" class="text-indigo-600 font-bold underline decoration-dotted decoration-indigo-300 underline-offset-2">${val}</button>
+                           </td>`;
+                });
+
+                // Kolom Poin: sama untuk semua baris mapel milik siswa ini,
+                // klik untuk buka modal Poin Karakter yang sudah ada (openPoinModal).
+                cellsHTML += `<td class="py-1.5 px-1 text-center">
+                               <button type="button" onclick="openPoinModal('${s.nis}', '${s.nama.replace(/'/g, "\\'")}', ${charPoints})" class="text-amber-600 font-bold">${charPoints}</button>
+                           </td>`;
+
+                tableRowsHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="py-1.5 px-1 font-semibold text-slate-700 text-[10px] truncate max-w-[70px]">${m}</td>
+                        ${cellsHTML}
+                    </tr>
+                `;
+            });
+
+            const tuntasBadgeHTML = isLengkapTotal
+                ? '<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide whitespace-nowrap"><i class="fa-solid fa-circle-check"></i> TUNTAS</span>'
+                : '<span class="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide whitespace-nowrap"><i class="fa-solid fa-circle-xmark"></i> TIDAK TUNTAS</span>';
+
+            const jumlahKolom = KOLOM_NILAI_TETAP.length + 1; // +1 untuk kolom Poin
+
+            return `
+                <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-[10px] text-left border-collapse min-w-[280px]">
+                        <thead>
+                            <tr class="border-b border-slate-100">
+                                <th class="py-1 px-1 align-bottom text-left">
+                                    <span class="font-bold text-slate-800 text-xs">${s.nama}</span>
+                                </th>
+                                <th class="py-1 px-1 text-center" colspan="${jumlahKolom}">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-slate-500 font-bold uppercase text-[9px]">Rata2 Nilai</span>
+                                        ${tuntasBadgeHTML}
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr class="border-b border-slate-100 bg-slate-50">
+                                <th class="py-1 px-1 text-left font-medium text-slate-400 text-[9px] whitespace-nowrap align-top">
+                                    NIS: ${s.nis}
+                                </th>
+                                ${KOLOM_NILAI_TETAP.map(col => `<th class="py-1 px-1 text-center uppercase text-slate-400 font-bold text-[8px]">${col.label}</th>`).join('')}
+                                <th class="py-1 px-1 text-center uppercase text-slate-400 font-bold text-[8px]">Poin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowsHTML || `<tr><td colspan="${jumlahKolom + 1}" class="text-center text-slate-400 py-3 italic text-[9px]">Belum ada data nilai mata pelajaran untuk siswa ini</td></tr>`}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // FUNGSI BARU: popup rincian nilai saat sebuah nilai pada tabel diklik.
+        // Menampilkan No, Judul Penilaian, Jenis Tugas, Tanggal Tugas, dan Nilai,
+        // diambil dari sheet 'nilai' lewat getDetailNilaiSiswa (fungsi backend baru,
+        // tidak mengubah getGradesByClass/getGradesForGuruWali yang sudah berjalan).
+        // Dibuat sebagai backdrop dinamis (mengikuti pola confirmModal/alertModal)
+        // supaya tetap tampil dengan benar walau dipanggil dari tab Wali Kelas
+        // ataupun tab Wali Guru.
+        // PERUBAHAN (permintaan guru wali, menu Nilai -- popup rincian nilai):
+        // Sebelumnya popup ini SELALU menampilkan SEMUA jenis nilai (Tugas, UH,
+        // UTS, dst) sekaligus dalam satu layar, hanya dipisah per-blok/header
+        // di dalamnya -- ini yang terlihat "tercampur" bagi guru wali. Sekarang
+        // popup HANYA menampilkan jenis yang SESUAI dengan kolom nilai yang
+        // diklik di kartu (parameter baru jenisFilter/jenisLabel, dikirim dari
+        // KOLOM_NILAI_TETAP di buildAkademikCardHTML -- lihat onclick di atas):
+        // klik nilai di kolom "Tugas" -> popup HANYA berisi baris berjenis
+        // "Tugas"; klik nilai di kolom "UH" -> popup HANYA berisi baris
+        // berjenis "Ulangan Harian"; klik nilai di kolom "UTS" -> popup HANYA
+        // berisi baris berjenis "UTS". Judul popup & header tabel otomatis
+        // mengikuti label kolom yang diklik (jenisLabel).
+        // Parameter jenisFilter & jenisLabel dibuat OPSIONAL (kalau tidak
+        // dikirim, perilaku balik seperti semula: tampil semua jenis
+        // terkelompok) supaya pemanggilan lama tetap jalan kalau ada.
+        // TIDAK mengubah getDetailNilaiSiswa() di backend maupun cara data
+        // diambil (nama+mapel saja yang dikirim ke backend) -- pemfilteran per
+        // jenis dilakukan di sisi frontend, memakai field r.jenis yang memang
+        // sudah dikategorikan backend lewat kategorikanJenisNilai_().
+        window.showNilaiDetailPopup = function(nama, mapel, jenisFilter, jenisLabel) {
+            const backdrop = document.createElement('div');
+            backdrop.className = "fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[110] flex items-center justify-center p-4 max-w-md mx-auto";
+
+            const judulPopup = jenisLabel ? `Rincian Nilai ${jenisLabel}` : 'Rincian Nilai';
+
+            backdrop.innerHTML = `
+                <div class="bg-white rounded-3xl p-5 w-full max-w-sm space-y-3 shadow-xl max-h-[80vh] flex flex-col">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-sm">${judulPopup}</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">${nama} &bull; ${mapel}</p>
+                        </div>
+                        <button id="closeNilaiDetailModal" class="text-slate-400 hover:text-slate-600 shrink-0"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="nilaiDetailBody" class="overflow-y-auto overflow-x-auto flex-1">
+                        <p class="text-xs text-slate-400 italic text-center py-6">Memuat data...</p>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(backdrop);
+            backdrop.querySelector('#closeNilaiDetailModal').addEventListener('click', () => backdrop.remove());
+
+            runBackend('getDetailNilaiSiswa', [nama, mapel], function(rows) {
+                const body = backdrop.querySelector('#nilaiDetailBody');
+                if (!rows || rows.length === 0) {
+                    body.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Belum ada rincian penilaian untuk mapel ini.</p>';
+                    return;
+                }
+
+                // Kalau popup dipanggil dari kolom tertentu (jenisFilter terisi),
+                // saring dulu baris yang jenisnya SAMA PERSIS dengan kolom itu
+                // (r.jenis dari backend sudah dikategorikan jadi "Ulangan
+                // Harian"/"Tugas"/apa adanya, jadi dibandingkan case-insensitive
+                // supaya tetap cocok walau ada beda besar-kecil huruf).
+                const filterKey = jenisFilter ? jenisFilter.toString().trim().toLowerCase() : '';
+                const rowsTersaring = filterKey
+                    ? rows.filter(r => (r.jenis || '').toString().trim().toLowerCase() === filterKey)
+                    : rows;
+
+                if (rowsTersaring.length === 0) {
+                    body.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-6">Belum ada rincian penilaian jenis ${jenisLabel || ''} untuk mapel ini.</p>`;
+                    return;
+                }
+
+                // Kelompokkan (dipakai kalau jenisFilter TIDAK dikirim, supaya
+                // perilaku lama -- semua jenis sekaligus, terkelompok per-blok --
+                // tetap tersedia sebagai fallback). Kalau jenisFilter dikirim,
+                // rowsTersaring isinya sudah SATU jenis saja jadi otomatis cuma
+                // menghasilkan SATU blok/tabel.
+                //
+                // Kolom di tiap kelompok, SESUAI permintaan: No Tugas, Penilaian,
+                // Tanggal, Nilai. Sumbernya (TIDAK mengubah getDetailNilaiSiswa()
+                // di backend, field2 ini sudah disediakan sebelumnya):
+                //   - No Tugas  -> r.tugas_ke        (sheet 'nilai' kolom I)
+                //   - Penilaian -> r.judul_penilaian  (sheet 'nilai' kolom B)
+                //   - Tanggal   -> r.waktu            (sheet 'nilai' kolom A, tanggal saja tanpa jam)
+                //   - Nilai     -> r.nilai             (sheet 'nilai' kolom G)
+                const grouped = {};
+                const groupOrder = [];
+                const groupLabel = {};
+                rowsTersaring.forEach(r => {
+                    const rawJenis = (r.jenis || 'Lainnya').toString().trim();
+                    const jenisKey = rawJenis.toLowerCase();
+                    if (!grouped[jenisKey]) {
+                        grouped[jenisKey] = [];
+                        groupOrder.push(jenisKey);
+                        groupLabel[jenisKey] = rawJenis || 'Lainnya';
+                    }
+                    grouped[jenisKey].push(r);
+                });
+
+                let groupsHTML = '';
+                groupOrder.forEach(jenisKey => {
+                    let itemRowsHTML = '';
+                    grouped[jenisKey].forEach(r => {
+                        itemRowsHTML += `
+                            <tr class="border-b border-slate-100">
+                                <td class="py-2 px-1.5 text-center text-slate-500 font-semibold">${r.tugas_ke || '-'}</td>
+                                <td class="py-2 px-1.5 font-semibold text-slate-800">${r.judul_penilaian || '-'}</td>
+                                <td class="py-2 px-1.5 text-center text-slate-500">${r.waktu || '-'}</td>
+                                <td class="py-2 px-1.5 text-center font-extrabold text-indigo-600">${r.nilai !== undefined && r.nilai !== null && r.nilai !== '' ? r.nilai : '-'}</td>
+                            </tr>
+                        `;
+                    });
+
+                    // Header blok hanya ditampilkan kalau memang menampilkan
+                    // lebih dari satu jenis sekaligus (mode lama/fallback tanpa
+                    // jenisFilter). Kalau sudah difilter ke satu jenis, judul
+                    // popup di atas sudah cukup mewakili -- tidak perlu diulang.
+                    const headerBlokHTML = jenisFilter ? '' : `<div class="bg-indigo-50 text-indigo-700 font-extrabold text-[9px] uppercase tracking-wide px-2 py-1.5 rounded-lg mb-1">${groupLabel[jenisKey]}</div>`;
+
+                    groupsHTML += `
+                        <div class="mb-3 last:mb-0">
+                            ${headerBlokHTML}
+                            <table class="w-full text-[10px] text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-400 font-bold border-b border-slate-100 text-[9px] uppercase">
+                                        <th class="py-2 px-1.5">No Tugas</th>
+                                        <th class="py-2 px-1.5">Penilaian</th>
+                                        <th class="py-2 px-1.5 text-center">Tanggal</th>
+                                        <th class="py-2 px-1.5 text-center">Nilai</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${itemRowsHTML}</tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+
+                body.innerHTML = groupsHTML || '<p class="text-xs text-slate-400 italic text-center py-6">Belum ada rincian penilaian untuk mapel ini.</p>';
+            }, function(err) {
+                const body = backdrop.querySelector('#nilaiDetailBody');
+                body.innerHTML = `<p class="text-xs text-rose-500 italic text-center py-6">Gagal memuat rincian nilai: ${err.message}</p>`;
+            });
+        };
+
         function renderWaliGrades() {
             const targetClass = currentUser.class_or_nip;
             
             showLoading(true);
-            runBackend('getSiswaByWaliKelas', [currentUser.name], function(allSiswa) {
-                runBackend('getGradesByClass', [targetClass], function(dynamicGradeResult) {
+            runBackendAll([
+                { method: 'resolveWaliKelasStudents', args: [currentUser.name, currentUser.class_or_nip] },
+                { method: 'getGradesByClass', args: [targetClass] }
+            ], function(results) {
+                const [allSiswa, dynamicGradeResult] = results;
+                {
                     showLoading(false);
                     const containerAkademik = document.getElementById('wkSiswaAkademikList');
                     const containerPoin = document.getElementById('wkSiswaPoinList');
@@ -3162,72 +3940,8 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
 
                     allSiswa.forEach(s => {
                         const scores = allNilai.filter(n => n.nama.toLowerCase() === s.nama.toLowerCase());
-                        
-                        let isLengkapTotal = true; 
-                        let tableRowsHTML = '';
 
-                        // Ambil daftar unique Mapel dari sheet untuk siswa ini
-                        const subjects = [...new Set(scores.map(g => g.mapel))];
-
-                        // Build headers row dynamically
-                        let tableHeadersHTML = `<th class="py-1 px-1">MAPEL</th>`;
-                        headers.forEach(h => {
-                            tableHeadersHTML += `<th class="py-1 px-1 text-center uppercase">${h}</th>`;
-                        });
-
-                        subjects.forEach(m => {
-                            const sc = scores.find(n => n.mapel === m) || { grades: {} };
-
-                            tableRowsHTML += `
-                                <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                    <td class="py-1 px-1 font-bold text-slate-800 text-[10px] truncate max-w-[60px]">${m}</td>
-                            `;
-
-                            headers.forEach(h => {
-                                const val = sc.grades[h];
-                                const isMissing = (val === undefined || val === null || val === '');
-                                if (isMissing) {
-                                    isLengkapTotal = false;
-                                }
-                                const displayVal = isMissing ? 
-                                    `<span class="text-rose-500 font-bold bg-rose-50 px-1 rounded">-</span>` : 
-                                    `<span class="text-slate-700 font-semibold">${val}</span>`;
-                                
-                                tableRowsHTML += `<td class="py-1 px-1 text-center text-[10px]">${displayVal}</td>`;
-                            });
-
-                            tableRowsHTML += `</tr>`;
-                        });
-
-                        containerAkademik.innerHTML += `
-                            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
-                                <div onclick="toggleAccordion('${s.nis}')" class="flex justify-between items-center cursor-pointer select-none">
-                                    <div>
-                                        <h5 class="font-bold text-slate-800 text-xs">${s.nama}</h5>
-                                        <p class="text-[9px] text-slate-400">NIS: ${s.nis}</p>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        ${isLengkapTotal ? 
-                                          '<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide"><i class="fa-solid fa-circle-check"></i> TUNTAS</span>' : 
-                                          '<span class="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide"><i class="fa-solid fa-circle-xmark"></i> TIDAK TUNTAS</span>'}
-                                        <i id="accordion-icon-${s.nis}" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-200"></i>
-                                    </div>
-                                </div>
-                                
-                                <div id="accordion-body-${s.nis}" class="hidden border-t border-slate-100 pt-2 overflow-x-auto">
-                                    <table class="w-full text-[9px] text-left border-collapse">
-                                        <thead>
-                                            <tr class="bg-slate-50 text-slate-555 font-bold border-b border-slate-100 text-[8px]">
-                                                ${tableHeadersHTML}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${tableRowsHTML || '<tr><td colspan="10" class="text-center text-slate-400 py-2 italic text-[9px]">Belum ada data nilai mata pelajaran untuk siswa ini</td></tr>'}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
+                        containerAkademik.innerHTML += buildAkademikCardHTML(s, headers, allNilai);
 
                         const charPoints = scores.length > 0 ? (scores[0].poin_karakter !== undefined ? scores[0].poin_karakter : 100) : 100;
                         const pointColor = charPoints >= 90 ? "bg-emerald-500" : charPoints >= 70 ? "bg-amber-500" : "bg-rose-500";
@@ -3246,6 +3960,90 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                             </div>
                         `;
                     });
+                }
+            });
+        }
+
+        // FUNGSI BARU (sebelumnya dipanggil di 3 tempat tapi TIDAK PERNAH
+        // didefinisikan, sehingga memicu error "renderWaliJurnal is not
+        // defined" saat tab Jurnal dibuka oleh Wali Kelas). Tidak mengubah
+        // fungsi/alur lain yang sudah berjalan (saveJurnal, getJurnalByClass,
+        // dsb tetap sama persis).
+        //
+        // Mengisi panel rekapitulasi (Total Tatap Muka, Guru Pengajar Aktif,
+        // Materi Pembelajaran Tercatat) serta daftar histori jurnal kelas
+        // binaan Wali Kelas pada tab "waliJurnalTab", dengan filter tanggal
+        // (wkJurnalFilterFromDate/ToDate) dan pencarian guru/materi
+        // (wkJurnalFilterSearch) sesuai input pada panel filter.
+        function renderWaliJurnal() {
+            const targetClass = currentUser.class_or_nip;
+            const fromDate = document.getElementById('wkJurnalFilterFromDate').value;
+            const toDate = document.getElementById('wkJurnalFilterToDate').value;
+            const searchTerm = document.getElementById('wkJurnalFilterSearch').value.trim().toLowerCase();
+
+            const classSub = document.getElementById('wkJurnalClassSub');
+            if (classSub) classSub.textContent = `Laporan jurnal pengajaran kelas ${targetClass}`;
+
+            showLoading(true);
+            runBackend('getJurnalByClass', [targetClass], function(jurnalList) {
+                showLoading(false);
+
+                let filtered = jurnalList || [];
+
+                if (fromDate) {
+                    filtered = filtered.filter(j => j.tanggal >= fromDate);
+                }
+                if (toDate) {
+                    filtered = filtered.filter(j => j.tanggal <= toDate);
+                }
+                if (searchTerm) {
+                    filtered = filtered.filter(j =>
+                        (j.guru || '').toLowerCase().includes(searchTerm) ||
+                        (j.materi || '').toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                // Urutkan dari pertemuan terbaru
+                filtered.sort((a, b) => {
+                    if (a.tanggal === b.tanggal) return (b.id || '').localeCompare(a.id || '');
+                    return b.tanggal.localeCompare(a.tanggal);
+                });
+
+                const guruAktifSet = new Set(filtered.map(j => (j.guru || '').trim()).filter(Boolean));
+                const materiTercatatCount = filtered.filter(j => !(j.materi || '').startsWith('GURU TIDAK HADIR')).length;
+
+                document.getElementById('wkJurnalCountPertemuan').textContent = filtered.length;
+                document.getElementById('wkJurnalCountGuru').textContent = guruAktifSet.size;
+                document.getElementById('wkJurnalCountMateri').textContent = materiTercatatCount;
+
+                const container = document.getElementById('wkJurnalList');
+                container.innerHTML = '';
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Belum ada data jurnal kelas untuk periode/pencarian ini.</p>';
+                    return;
+                }
+
+                filtered.forEach(j => {
+                    const isTidakHadir = (j.materi || '').startsWith('GURU TIDAK HADIR');
+                    const badgeClass = isTidakHadir ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600';
+                    const badgeLabel = isTidakHadir ? 'Guru Tidak Hadir' : 'Tatap Muka';
+
+                    container.innerHTML += `
+                        <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="truncate">
+                                    <h5 class="font-bold text-slate-800 text-xs truncate">${j.guru}</h5>
+                                    <p class="text-[9px] text-slate-400">${j.mapel || '-'} | ${formatTanggalIndo(j.tanggal)} | Jam Ke-${j.jam_ke || '-'}</p>
+                                </div>
+                                <span class="px-2 py-1 ${badgeClass} font-extrabold text-[9px] rounded-full flex-shrink-0">${badgeLabel}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-600"><span class="font-bold text-slate-500">Materi:</span> ${j.materi || '-'}</p>
+                            ${j.tugas ? `<p class="text-[10px] text-slate-600"><span class="font-bold text-slate-500">Tugas:</span> ${j.tugas}</p>` : ''}
+                            ${j.catatan ? `<p class="text-[10px] text-slate-600"><span class="font-bold text-slate-500">Catatan:</span> ${j.catatan}</p>` : ''}
+                            <p class="text-[9px] text-slate-400">Jam Masuk-Keluar: ${j.jam_masuk || '-'} s/d ${j.jam_keluar || '-'} | Pendampingan: ${j.pendampingan || '-'}</p>
+                        </div>
+                    `;
                 });
             });
         }
@@ -3256,8 +4054,12 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             document.getElementById('wgNipWali').textContent = "NIP: " + currentUser.username;
 
             showLoading(true);
-            runBackend('getSiswaByGuruWali', [targetWaliName], function(allSiswa) {
-                runBackend('getGradesForGuruWali', [targetWaliName], function(dynamicGradeResult) {
+            runBackendAll([
+                { method: 'getSiswaByGuruWali', args: [targetWaliName] },
+                { method: 'getGradesForGuruWali', args: [targetWaliName] }
+            ], function(results) {
+                const [allSiswa, dynamicGradeResult] = results;
+                {
                     showLoading(false);
                     const container = document.getElementById('wgDaftarSiswaList');
                     container.innerHTML = '';
@@ -3300,7 +4102,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                             </div>
                         `;
                     });
-                });
+                }
             });
         }
 
@@ -3308,8 +4110,12 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const targetWaliName = currentUser.name;
             
             showLoading(true);
-            runBackend('getSiswaByGuruWali', [targetWaliName], function(allSiswa) {
-                runBackend('getAttendanceForGuruWali', [targetWaliName], function(allAbsen) {
+            runBackendAll([
+                { method: 'getSiswaByGuruWali', args: [targetWaliName] },
+                { method: 'getAttendanceForGuruWali', args: [targetWaliName] }
+            ], function(results) {
+                const [allSiswa, allAbsen] = results;
+                {
                     showLoading(false);
                     const filterSiswaSelect = document.getElementById('wgAbsenFilterSiswa');
                     const prevSelection = filterSiswaSelect.value || "Semua";
@@ -3322,7 +4128,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
 
                     if (allSiswa.length === 0) {
                         document.getElementById('wgRekapAbsenGlobalCard').innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Belum ada siswa binaan asuh.</p>';
-                        document.getElementById('wgFilteredAbsenResults').innerHTML = '';
+                        document.getElementById('wgSosenTable').innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-400 text-xs">Belum ada siswa binaan asuh.</td></tr>';
                         return;
                     }
                     
@@ -3346,7 +4152,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                         targetRecords = targetRecords.filter(r => r.status.startsWith(filterStatus));
                     }
 
-                    let totalHadir = 0, totalTerlambat = 0, totalDispen = 0, totalSakit = 0, totalIzin = 0, totalAlfa = 0, totalPulangCepat = 0;
+                    let totalHadir = 0, totalTerlambat = 0, totalDispen = 0, totalSakit = 0, totalIzin = 0, totalAlfa = 0, totalPulangCepat = 0, totalBolos = 0, totalIzinTerlambat = 0;
 
                     targetRecords.forEach(r => {
                         if (r.status === 'Hadir') totalHadir++;
@@ -3356,9 +4162,27 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                         else if (r.status === 'Izin') totalIzin++;
                         else if (r.status === 'Alfa') totalAlfa++;
                         else if (r.status.startsWith('Pulang Cepat')) totalPulangCepat++;
+                        else if (r.status === 'Bolos') totalBolos++;
+                        else if (r.status === 'Izin Terlambat') totalIzinTerlambat++;
                     });
                     
                     const uniqueClasses = [...new Set(allSiswa.map(s => s.kelas))].join(", ");
+
+                    // Kelompokkan absensi HARI INI saja (untuk popup kartu rekap),
+                    // terpisah dari hasil filter tanggal/nama/status pada panel Filter Absensi Siswa Binaan.
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const recordsToday = allAbsen.filter(r => r.tanggal === todayStr);
+                    window.wgAbsenByStatusToday = {
+                        Hadir: recordsToday.filter(r => r.status === 'Hadir'),
+                        Terlambat: recordsToday.filter(r => r.status === 'Terlambat'),
+                        Dispen: recordsToday.filter(r => r.status === 'Dispen'),
+                        Sakit: recordsToday.filter(r => r.status === 'Sakit'),
+                        Izin: recordsToday.filter(r => r.status === 'Izin'),
+                        Alfa: recordsToday.filter(r => r.status === 'Alfa'),
+                        PulangCepat: recordsToday.filter(r => r.status.startsWith('Pulang Cepat')),
+                        Bolos: recordsToday.filter(r => r.status === 'Bolos'),
+                        IzinTerlambat: recordsToday.filter(r => r.status === 'Izin Terlambat')
+                    };
 
                     document.getElementById('wgRekapAbsenGlobalCard').innerHTML = `
                         <div class="p-5 bg-gradient-to-br from-indigo-50 to-emerald-50 border border-slate-200 rounded-3xl shadow-sm space-y-4">
@@ -3368,31 +4192,39 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                                 <p class="text-[9px] text-slate-400 font-semibold mt-1">Kelas Asal Siswa: ${uniqueClasses || '-'}</p>
                             </div>
                             <div class="grid grid-cols-2 gap-3 text-xs">
-                                <div class="flex justify-between items-center p-3 bg-white border border-emerald-100 rounded-2xl">
+                                <div onclick="showAbsenStatusPopup('Hadir Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Hadir) || [])" class="flex justify-between items-center p-3 bg-white border border-emerald-100 rounded-2xl cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-500 font-medium">Hadir</span>
                                     <span class="font-extrabold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl text-[11px]">${totalHadir} kali</span>
                                 </div>
-                                <div class="flex justify-between items-center p-3 bg-white border border-yellow-100 rounded-2xl">
+                                <div onclick="showAbsenStatusPopup('Terlambat Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Terlambat) || [])" class="flex justify-between items-center p-3 bg-white border border-yellow-100 rounded-2xl cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-555 font-medium">Terlambat</span>
                                     <span class="font-extrabold text-yellow-600 bg-yellow-50 px-3 py-1 rounded-xl text-[11px]">${totalTerlambat} kali</span>
                                 </div>
-                                <div class="flex justify-between items-center p-3 bg-white border border-blue-100 rounded-2xl">
+                                <div onclick="showAbsenStatusPopup('Dispen Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Dispen) || [])" class="flex justify-between items-center p-3 bg-white border border-blue-100 rounded-2xl cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-555 font-medium">Dispen</span>
                                     <span class="font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-xl text-[11px]">${totalDispen} kali</span>
                                 </div>
-                                <div class="flex justify-between items-center p-3 bg-white border border-amber-100 rounded-2xl">
+                                <div onclick="showAbsenStatusPopup('Sakit Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Sakit) || [])" class="flex justify-between items-center p-3 bg-white border border-amber-100 rounded-2xl cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-555 font-medium">Sakit</span>
                                     <span class="font-extrabold text-amber-600 bg-amber-50 px-3 py-1 rounded-xl text-[11px]">${totalSakit} kali</span>
                                 </div>
-                                <div class="flex justify-between items-center p-3 bg-white border border-purple-100 rounded-2xl">
+                                <div onclick="showAbsenStatusPopup('Izin Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Izin) || [])" class="flex justify-between items-center p-3 bg-white border border-purple-100 rounded-2xl cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-555 font-medium">Izin</span>
                                     <span class="font-extrabold text-purple-600 bg-purple-50 px-3 py-1 rounded-xl text-[11px]">${totalIzin} kali</span>
                                 </div>
-                                <div class="flex justify-between items-center p-3 bg-white border border-rose-100 rounded-2xl">
+                                <div onclick="showAbsenStatusPopup('Alfa Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Alfa) || [])" class="flex justify-between items-center p-3 bg-white border border-rose-100 rounded-2xl cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-555 font-medium">Alfa</span>
                                     <span class="font-extrabold text-rose-600 bg-rose-50 px-3 py-1 rounded-xl text-[11px]">${totalAlfa} kali</span>
                                 </div>
-                                <div class="flex justify-between items-center p-3 bg-white border border-orange-100 rounded-2xl col-span-2">
+                                <div onclick="showAbsenStatusPopup('Bolos Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.Bolos) || [])" class="flex justify-between items-center p-3 bg-white border border-red-100 rounded-2xl cursor-pointer active:scale-95 transition">
+                                    <span class="text-slate-555 font-medium">Bolos</span>
+                                    <span class="font-extrabold text-red-600 bg-red-50 px-3 py-1 rounded-xl text-[11px]">${totalBolos} kali</span>
+                                </div>
+                                <div onclick="showAbsenStatusPopup('Izin Terlambat Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.IzinTerlambat) || [])" class="flex justify-between items-center p-3 bg-white border border-cyan-100 rounded-2xl cursor-pointer active:scale-95 transition">
+                                    <span class="text-slate-555 font-medium">Izin Terlambat</span>
+                                    <span class="font-extrabold text-cyan-600 bg-cyan-50 px-3 py-1 rounded-xl text-[11px]">${totalIzinTerlambat} kali</span>
+                                </div>
+                                <div onclick="showAbsenStatusPopup('Pulang Cepat Hari Ini', (window.wgAbsenByStatusToday && wgAbsenByStatusToday.PulangCepat) || [])" class="flex justify-between items-center p-3 bg-white border border-orange-100 rounded-2xl col-span-2 cursor-pointer active:scale-95 transition">
                                     <span class="text-slate-555 font-medium">Pulang Cepat</span>
                                     <span class="font-extrabold text-orange-600 bg-orange-50 px-3 py-1 rounded-xl text-[11px]">${totalPulangCepat} kali</span>
                                 </div>
@@ -3400,49 +4232,118 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                         </div>
                     `;
 
-                    const resultsContainer = document.getElementById('wgFilteredAbsenResults');
-                    resultsContainer.innerHTML = '';
-                    
-                    if (targetRecords.length === 0) {
-                        resultsContainer.innerHTML = '<p class="text-[10px] text-slate-400 italic text-center py-4">Tidak ada data absensi yang sesuai filter.</p>';
-                        return;
+                    // ==== Rincian Siswa Binaan (Tabel + Cetak Laporan) ====
+                    // Format tabel & cetak laporan ini SENGAJA disamakan dengan
+                    // "Rincian Siswa Kelas Binaan" milik Wali Kelas (processWaliReportsUI),
+                    // supaya tampilan & hasil cetak Wali Guru konsisten dengan Wali Kelas.
+                    // Data & filter yang sudah berjalan di atas (targetRecords, totalHadir dkk)
+                    // TIDAK diubah — hanya cara render hasilnya yang disamakan formatnya.
+                    let siswaBinaanDisplayWg = allSiswa;
+                    if (filterSiswaNis !== "Semua") {
+                        siswaBinaanDisplayWg = allSiswa.filter(s => String(s.nis).trim() === String(filterSiswaNis).trim());
                     }
 
-                    targetRecords.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                    const statusColorMapWg = {
+                        'H': 'text-emerald-600',
+                        'T': 'text-yellow-600',
+                        'D': 'text-blue-600',
+                        'S': 'text-amber-600',
+                        'I': 'text-purple-600',
+                        'A': 'text-rose-600',
+                        'PC': 'text-orange-600',
+                        'B': 'text-red-600',
+                        'IT': 'text-cyan-600'
+                    };
+                    function statusKeKodeWg(status) {
+                        if (!status) return '-';
+                        if (status.startsWith('Pulang Cepat')) return 'PC';
+                        if (status === 'Hadir') return 'H';
+                        if (status === 'Alfa') return 'A';
+                        if (status === 'Sakit') return 'S';
+                        if (status === 'Izin') return 'I';
+                        if (status === 'Dispen') return 'D';
+                        if (status === 'Terlambat') return 'T';
+                        if (status === 'Bolos') return 'B';
+                        if (status === 'Izin Terlambat') return 'IT';
+                        return status.charAt(0).toUpperCase();
+                    }
 
-                    targetRecords.forEach(r => {
-                        let badgeClass = "bg-slate-100 text-slate-700";
-                        let statusLabel = r.status;
-                        
-                        if (r.status === 'Hadir') badgeClass = "bg-emerald-50 text-emerald-700";
-                        else if (r.status === 'Terlambat') badgeClass = "bg-yellow-50 text-yellow-700";
-                        else if (r.status === 'Dispen') badgeClass = "bg-blue-50 text-blue-700";
-                        else if (r.status === 'Sakit') badgeClass = "bg-amber-50 text-amber-700";
-                        else if (r.status === 'Izin') badgeClass = "bg-purple-50 text-purple-700";
-                        else if (r.status === 'Alfa') badgeClass = "bg-rose-50 text-rose-700";
-                        else if (r.status.startsWith('Pulang Cepat')) {
-                            badgeClass = "bg-orange-50 text-orange-700";
-                            statusLabel = "Pulang Cepat";
-                        }
+                    let recordsForBinaanWg = targetRecords.slice();
+                    recordsForBinaanWg.sort((a, b) => {
+                        if (a.tanggal === b.tanggal) return a.nama.localeCompare(b.nama);
+                        return a.tanggal.localeCompare(b.tanggal);
+                    });
 
-                        resultsContainer.innerHTML += `
-                            <div class="flex flex-col p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs gap-1">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <span class="font-bold text-slate-800">${r.nama}</span>
-                                        <span class="text-[9px] text-slate-400 block">${r.tanggal} | NIS: ${r.nis}</span>
-                                    </div>
-                                    <span class="px-2 py-0.5 ${badgeClass} font-bold text-[8px] rounded-lg tracking-wide uppercase">${statusLabel}</span>
-                                </div>
-                                ${r.status.startsWith('Pulang Cepat') && r.status.includes(' - ') ? `
-                                    <div class="text-[10px] text-orange-700 bg-orange-50/50 p-2 rounded-lg italic">
-                                        <b>Alasan PC:</b> ${r.status.split(' - ')[1]}
-                                    </div>
-                                ` : ''}
-                            </div>
+                    const tanggalUnikWg = [...new Set(recordsForBinaanWg.map(r => r.tanggal))].sort();
+
+                    const theadWg = document.getElementById('wgSosenTableHead');
+                    const kolomTanggalHTMLWg = tanggalUnikWg.length
+                        ? tanggalUnikWg.map(t => {
+                              const bagian = t.split('-');
+                              const labelHari = bagian.length === 3 ? parseInt(bagian[2], 10) : t;
+                              return `<th class="py-1 px-1.5 text-center font-bold">${labelHari}</th>`;
+                          }).join('')
+                        : '<th class="py-1 px-1.5 text-center">-</th>';
+
+                    theadWg.innerHTML = `
+                        <tr class="border-b border-slate-100 text-slate-400 text-[10px]">
+                            <th class="py-2 w-8 sikat-sticky-no" rowspan="2">No</th>
+                            <th class="py-2 sikat-sticky-nama" rowspan="2">Nama</th>
+                            <th class="py-2 text-center" colspan="${tanggalUnikWg.length || 1}">Tanggal</th>
+                            <th class="py-2 px-1.5 text-center text-emerald-600" rowspan="2">Hadir</th>
+                        </tr>
+                        <tr class="border-b border-slate-100 text-slate-400 text-[9px]">
+                            ${kolomTanggalHTMLWg}
+                        </tr>
+                    `;
+
+                    const tbodyWg = document.getElementById('wgSosenTable');
+                    tbodyWg.innerHTML = '';
+
+                    siswaBinaanDisplayWg.forEach((s, idx) => {
+                        const recordsSiswaIniWg = recordsForBinaanWg.filter(r => String(r.nis).trim() === String(s.nis).trim());
+                        const rekapPerTanggal = {};
+                        recordsSiswaIniWg.forEach(r => {
+                            rekapPerTanggal[r.tanggal] = statusKeKodeWg(r.status);
+                        });
+                        // Jumlah Hadir per siswa: total status "Hadir" sesuai filter yang aktif
+                        const jumlahHadirSiswaWg = recordsSiswaIniWg.filter(r => r.status === 'Hadir').length;
+
+                        const selTanggalHTML = tanggalUnikWg.length
+                            ? tanggalUnikWg.map(t => {
+                                  const kode = rekapPerTanggal[t] || '-';
+                                  const warna = statusColorMapWg[kode] || 'text-slate-300';
+                                  return `<td class="py-2 px-1.5 text-center font-bold ${warna}">${kode}</td>`;
+                              }).join('')
+                            : '<td class="py-2 px-1.5 text-center text-slate-300">-</td>';
+
+                        tbodyWg.innerHTML += `
+                            <tr class="border-b border-slate-100 hover:bg-slate-50/50 text-xs">
+                                <td class="py-3 text-center text-slate-500 font-semibold sikat-sticky-no">${idx + 1}</td>
+                                <td class="py-3 font-semibold text-slate-800 sikat-sticky-nama">
+                                    <div>${s.nama}</div>
+                                    <div class="text-[9px] text-slate-400 font-medium">NIS: ${s.nis}</div>
+                                </td>
+                                ${selTanggalHTML}
+                                <td class="py-3 px-1.5 text-center font-extrabold text-emerald-600">${jumlahHadirSiswaWg}</td>
+                            </tr>
                         `;
                     });
-                });
+
+                    if (siswaBinaanDisplayWg.length === 0) {
+                        tbodyWg.innerHTML = `<tr><td colspan="${(tanggalUnikWg.length || 1) + 3}" class="py-6 text-center text-slate-400 text-xs">Tidak ada data absensi sesuai filter.</td></tr>`;
+                    }
+
+                    document.getElementById('wgTotalHadir').textContent = totalHadir;
+                    document.getElementById('wgTotalTerlambat').textContent = totalTerlambat;
+                    document.getElementById('wgTotalDispen').textContent = totalDispen;
+                    document.getElementById('wgTotalSakit').textContent = totalSakit;
+                    document.getElementById('wgTotalIzin').textContent = totalIzin;
+                    document.getElementById('wgTotalAlfa').textContent = totalAlfa;
+                    document.getElementById('wgTotalPulangCepat').textContent = totalPulangCepat;
+                    document.getElementById('wgTotalBolos').textContent = totalBolos;
+                    document.getElementById('wgTotalIzinTerlambat').textContent = totalIzinTerlambat;
+                }
             });
         }
 
@@ -3454,12 +4355,32 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             }
         });
 
+        // Listener tombol Cetak Laporan khusus Guru Wali (format disamakan dengan wkPrintAbsenBtn milik Wali Kelas)
+        const btnWgPrintAbsen = document.getElementById('wgPrintAbsenBtn');
+        if (btnWgPrintAbsen) {
+            btnWgPrintAbsen.addEventListener('click', () => {
+                const pLabelWg = document.getElementById('wgPrintClassAndDate');
+                const startDateWg = document.getElementById('wgAbsenFilterStart').value || '-';
+                const endDateWg = document.getElementById('wgAbsenFilterEnd').value || '-';
+                const siswaSelWg = document.getElementById('wgAbsenFilterSiswa').selectedOptions[0]
+                    ? document.getElementById('wgAbsenFilterSiswa').selectedOptions[0].textContent
+                    : 'Semua Siswa';
+
+                pLabelWg.textContent = `Guru Wali: ${currentUser.name} | Rentang: ${formatTanggalIndo(startDateWg)} s/d ${formatTanggalIndo(endDateWg)} | Siswa: ${siswaSelWg}`;
+                window.print();
+            });
+        }
+
         function renderWaliGuruWaliNilai() {
             const targetWaliName = currentUser.name;
             
             showLoading(true);
-            runBackend('getSiswaByGuruWali', [targetWaliName], function(allSiswa) {
-                runBackend('getGradesForGuruWali', [targetWaliName], function(dynamicGradeResult) {
+            runBackendAll([
+                { method: 'getSiswaByGuruWali', args: [targetWaliName] },
+                { method: 'getGradesForGuruWali', args: [targetWaliName] }
+            ], function(results) {
+                const [allSiswa, dynamicGradeResult] = results;
+                {
                     showLoading(false);
                     const container = document.getElementById('wgRekapNilaiList');
                     container.innerHTML = '';
@@ -3473,73 +4394,9 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                     const allNilai = dynamicGradeResult.data || [];
                     
                     allSiswa.forEach(s => {
-                        const scores = allNilai.filter(n => n.nama.toLowerCase() === s.nama.toLowerCase());
-                        let isLengkapTotal = true;
-                        let tableRowsHTML = '';
-
-                        // Ambil unique Mapel secara dinamis
-                        const subjects = [...new Set(scores.map(g => g.mapel))];
-
-                        // Build headers row dynamically
-                        let tableHeadersHTML = `<th class="py-1 px-1">MAPEL</th>`;
-                        headers.forEach(h => {
-                            tableHeadersHTML += `<th class="py-1 px-1 text-center uppercase">${h}</th>`;
-                        });
-
-                        subjects.forEach(m => {
-                            const sc = scores.find(n => n.mapel === m) || { grades: {} };
-
-                            tableRowsHTML += `
-                                <tr class="border-b border-slate-100 hover:bg-slate-50">
-                                    <td class="py-1 px-1 font-bold text-slate-800 text-[10px] truncate max-w-[60px]">${m}</td>
-                            `;
-
-                            headers.forEach(h => {
-                                const val = sc.grades[h];
-                                const isMissing = (val === undefined || val === null || val === '');
-                                if (isMissing) {
-                                    isLengkapTotal = false;
-                                }
-                                const displayVal = isMissing ? 
-                                    `<span class="text-rose-500 font-bold bg-rose-50 px-1 rounded">-</span>` : 
-                                    `<span class="text-slate-700 font-semibold">${val}</span>`;
-                                
-                                tableRowsHTML += `<td class="py-1 px-1 text-center text-[10px]">${displayVal}</td>`;
-                            });
-
-                            tableRowsHTML += `</tr>`;
-                        });
-
-                        container.innerHTML += `
-                            <div class="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
-                                <div onclick="toggleAccordion('wg-nilai-${s.nis}')" class="flex justify-between items-center cursor-pointer select-none">
-                                    <div>
-                                        <h5 class="font-bold text-slate-800 text-xs">${s.nama}</h5>
-                                        <p class="text-[9px] text-slate-400">NIS: ${s.nis}</p>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        ${isLengkapTotal ? 
-                                          '<span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide"><i class="fa-solid fa-circle-check"></i> TUNTAS</span>' : 
-                                          '<span class="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide"><i class="fa-solid fa-circle-xmark"></i> TIDAK TUNTAS</span>'}
-                                        <i id="accordion-icon-wg-nilai-${s.nis}" class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform duration-200"></i>
-                                    </div>
-                                </div>
-                                <div id="accordion-body-wg-nilai-${s.nis}" class="hidden border-t border-slate-100 pt-2 overflow-x-auto">
-                                    <table class="w-full text-[9px] text-left border-collapse">
-                                        <thead>
-                                            <tr class="bg-slate-50 text-slate-550 font-bold border-b border-slate-100 text-[8px]">
-                                                ${tableHeadersHTML}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${tableRowsHTML || '<tr><td colspan="10" class="text-center text-slate-400 py-2 italic text-[9px]">Belum ada data nilai mata pelajaran untuk siswa ini</td></tr>'}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
+                        container.innerHTML += buildAkademikCardHTML(s, headers, allNilai);
                     });
-                });
+                }
             });
         }
 
@@ -3547,8 +4404,12 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const targetWaliName = currentUser.name;
             
             showLoading(true);
-            runBackend('getSiswaByGuruWali', [targetWaliName], function(allSiswa) {
-                runBackend('getGradesForGuruWali', [targetWaliName], function(dynamicGradeResult) {
+            runBackendAll([
+                { method: 'getSiswaByGuruWali', args: [targetWaliName] },
+                { method: 'getGradesForGuruWali', args: [targetWaliName] }
+            ], function(results) {
+                const [allSiswa, dynamicGradeResult] = results;
+                {
                     showLoading(false);
                     const container = document.getElementById('wgRekapPoinList');
                     container.innerHTML = '';
@@ -3579,7 +4440,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                             </div>
                         `;
                     });
-                });
+                }
             });
         }
 
@@ -3763,7 +4624,7 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
             const selectWk = document.getElementById('psNamaSiswa');
             if (selectWk) {
                 selectWk.innerHTML = '<option value="">-- Pilih Siswa --</option>';
-                runBackend('getSiswaByWaliKelas', [currentUser.name], function(classSiswa) {
+                runBackend('resolveWaliKelasStudents', [currentUser.name, currentUser.class_or_nip], function(classSiswa) {
                     selectWk.innerHTML = '<option value="">-- Pilih Siswa --</option>';
                     classSiswa.forEach(s => {
                         selectWk.innerHTML += `<option value="${s.nama}" data-nis="${s.nis}">${s.nama}</option>`;
@@ -4070,11 +4931,18 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
         function alertModal(title, msg) {
             const backdrop = document.createElement('div');
             backdrop.className = "fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[150] flex items-center justify-center p-4 max-w-md mx-auto";
-            
+
+            // Escape HTML & ubah newline jadi <br> supaya pesan error yang berisi
+            // potongan respons mentah (bisa saja mengandung tag HTML/'<') tidak
+            // dieksekusi sebagai markup dan merusak tampilan modal.
+            const escapeDiv = document.createElement('div');
+            escapeDiv.textContent = String(msg);
+            const safeMsg = escapeDiv.innerHTML.replace(/\n/g, '<br>');
+
             backdrop.innerHTML = `
                 <div class="bg-white rounded-3xl p-6 w-full max-w-xs space-y-4 text-center shadow-xl">
                     <h4 class="font-extrabold text-slate-800 text-sm">${title}</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">${msg}</p>
+                    <p class="text-xs text-slate-500 leading-relaxed text-left break-words">${safeMsg}</p>
                     <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl uppercase tracking-wider">OK</button>
                 </div>
             `;
@@ -4139,6 +5007,56 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 document.getElementById('jurnalPendampinganLainnya').value = '';
             }
         };
+    </script>
+    <!-- Popup Daftar Siswa per Status Absen Hari Ini (Hadir/Terlambat/Dispen/Sakit/Izin/Alfa/Pulang Cepat) -->
+    <!-- Elemen baru, tidak mengubah/menghapus modal atau kode lain yang sudah berjalan -->
+    <div id="absenStatusPopup" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4 max-w-md mx-auto">
+        <div class="bg-white rounded-3xl p-5 w-full max-w-sm shadow-xl space-y-3 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Daftar Siswa</span>
+                    <h4 id="absenStatusPopupTitle" class="font-extrabold text-slate-800 text-sm mt-0.5">Hadir</h4>
+                </div>
+                <button onclick="closeAbsenStatusPopup()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 w-8 h-8 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="absenStatusPopupList" class="space-y-2 overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <script>
+        // Fungsi baru (berdiri sendiri) untuk menampilkan popup daftar siswa sesuai status absen
+        // yang diklik. Tidak mengubah fungsi/variabel lain yang sudah berjalan.
+        function showAbsenStatusPopup(statusLabel, records) {
+            const popup = document.getElementById('absenStatusPopup');
+            const title = document.getElementById('absenStatusPopupTitle');
+            const list = document.getElementById('absenStatusPopupList');
+
+            title.textContent = statusLabel;
+            list.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                list.innerHTML = '<p class="text-[11px] text-slate-400 italic text-center py-6">Belum ada siswa dengan status ini hari ini.</p>';
+            } else {
+                records.forEach(r => {
+                    list.innerHTML += `
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                            <div>
+                                <span class="font-bold text-slate-800">${r.nama}</span>
+                                <span class="text-[9px] text-slate-400 block">${(typeof formatTanggalIndo === 'function' ? formatTanggalIndo(r.tanggal) : r.tanggal)} | NIS: ${r.nis}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            popup.classList.remove('hidden');
+        }
+
+        function closeAbsenStatusPopup() {
+            document.getElementById('absenStatusPopup').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
