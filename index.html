@@ -776,7 +776,7 @@
                                         <th class="py-2 w-8 sikat-sticky-no">No</th>
                                         <th class="py-2 sikat-sticky-nama">Nama</th>
                                         <th class="py-2">Tanggal</th>
-                                        <th class="py-2 text-center">Hadir</th>
+                                        <th class="py-2 text-center">Jumlah</th>
                                     </tr>
                                 </thead>
                                 <tbody id="wkSosenTable" class="divide-y divide-slate-100">
@@ -1161,7 +1161,7 @@
                                                 <th class="py-2 w-8 sikat-sticky-no">No</th>
                                                 <th class="py-2 sikat-sticky-nama">Nama</th>
                                                 <th class="py-2">Tanggal</th>
-                                                <th class="py-2 text-center">Hadir</th>
+                                                <th class="py-2 text-center">Jumlah</th>
                                             </tr>
                                         </thead>
                                         <tbody id="wgSosenTable" class="divide-y divide-slate-100">
@@ -3526,10 +3526,18 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                     <th class="py-2 w-8 sikat-sticky-no" rowspan="2">No</th>
                     <th class="py-2 sikat-sticky-nama" rowspan="2">Nama</th>
                     <th class="py-2 text-center" colspan="${tanggalUnik.length || 1}">Tanggal</th>
-                    <th class="py-2 px-1.5 text-center text-emerald-600" rowspan="2">Hadir</th>
+                    <th class="py-2 text-center" colspan="8">Jumlah</th>
                 </tr>
                 <tr class="border-b border-slate-100 text-slate-400 text-[9px]">
                     ${kolomTanggalHTML}
+                    <th class="py-1 px-1 text-center text-emerald-600">H</th>
+                    <th class="py-1 px-1 text-center text-yellow-600">T</th>
+                    <th class="py-1 px-1 text-center text-blue-600">D</th>
+                    <th class="py-1 px-1 text-center text-amber-600">S</th>
+                    <th class="py-1 px-1 text-center text-purple-600">I</th>
+                    <th class="py-1 px-1 text-center text-red-600">B</th>
+                    <th class="py-1 px-1 text-center text-orange-600">PC</th>
+                    <th class="py-1 px-1 text-center text-cyan-600">IT</th>
                 </tr>
             `;
 
@@ -3542,8 +3550,18 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                 recordsSiswaIni.forEach(r => {
                     rekapPerTanggal[r.tanggal] = statusKeKode(r.status);
                 });
-                // Jumlah Hadir per siswa: total status "Hadir" sesuai filter yang aktif
-                const jumlahHadirSiswa = recordsSiswaIni.filter(r => r.status === 'Hadir').length;
+                // Jumlah per status untuk siswa ini, sesuai filter yang aktif
+                let jH = 0, jT = 0, jD = 0, jS = 0, jI = 0, jB = 0, jPC = 0, jIT = 0;
+                recordsSiswaIni.forEach(r => {
+                    if (r.status === 'Hadir') jH++;
+                    else if (r.status === 'Terlambat') jT++;
+                    else if (r.status === 'Dispen') jD++;
+                    else if (r.status === 'Sakit') jS++;
+                    else if (r.status === 'Izin') jI++;
+                    else if (r.status === 'Bolos') jB++;
+                    else if (r.status.startsWith('Pulang Cepat')) jPC++;
+                    else if (r.status === 'Izin Terlambat') jIT++;
+                });
 
                 const selTanggalHTML = tanggalUnik.length
                     ? tanggalUnik.map(t => {
@@ -3553,6 +3571,17 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                       }).join('')
                     : '<td class="py-2 px-1.5 text-center text-slate-300">-</td>';
 
+                const jumlahHTML = `
+                    <td class="py-3 px-1 text-center font-extrabold text-emerald-600">${jH}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-yellow-600">${jT}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-blue-600">${jD}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-amber-600">${jS}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-purple-600">${jI}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-red-600">${jB}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-orange-600">${jPC}</td>
+                    <td class="py-3 px-1 text-center font-extrabold text-cyan-600">${jIT}</td>
+                `;
+
                 tbody.innerHTML += `
                     <tr class="border-b border-slate-100 hover:bg-slate-50/50 text-xs">
                         <td class="py-3 text-center text-slate-500 font-semibold sikat-sticky-no">${idx + 1}</td>
@@ -3561,13 +3590,13 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                             <div class="text-[9px] text-slate-400 font-medium">NIS: ${s.nis}</div>
                         </td>
                         ${selTanggalHTML}
-                        <td class="py-3 px-1.5 text-center font-extrabold text-emerald-600">${jumlahHadirSiswa}</td>
+                        ${jumlahHTML}
                     </tr>
                 `;
             });
 
             if (siswaBinaanDisplay.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${(tanggalUnik.length || 1) + 3}" class="py-6 text-center text-slate-400 text-xs">Tidak ada data absensi sesuai filter.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${(tanggalUnik.length || 1) + 10}" class="py-6 text-center text-slate-400 text-xs">Tidak ada data absensi sesuai filter.</td></tr>`;
             }
 
             document.getElementById('wkTotalHadir').textContent = gHadir;
@@ -4290,10 +4319,18 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                             <th class="py-2 w-8 sikat-sticky-no" rowspan="2">No</th>
                             <th class="py-2 sikat-sticky-nama" rowspan="2">Nama</th>
                             <th class="py-2 text-center" colspan="${tanggalUnikWg.length || 1}">Tanggal</th>
-                            <th class="py-2 px-1.5 text-center text-emerald-600" rowspan="2">Hadir</th>
+                            <th class="py-2 text-center" colspan="8">Jumlah</th>
                         </tr>
                         <tr class="border-b border-slate-100 text-slate-400 text-[9px]">
                             ${kolomTanggalHTMLWg}
+                            <th class="py-1 px-1 text-center text-emerald-600">H</th>
+                            <th class="py-1 px-1 text-center text-yellow-600">T</th>
+                            <th class="py-1 px-1 text-center text-blue-600">D</th>
+                            <th class="py-1 px-1 text-center text-amber-600">S</th>
+                            <th class="py-1 px-1 text-center text-purple-600">I</th>
+                            <th class="py-1 px-1 text-center text-red-600">B</th>
+                            <th class="py-1 px-1 text-center text-orange-600">PC</th>
+                            <th class="py-1 px-1 text-center text-cyan-600">IT</th>
                         </tr>
                     `;
 
@@ -4306,8 +4343,18 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                         recordsSiswaIniWg.forEach(r => {
                             rekapPerTanggal[r.tanggal] = statusKeKodeWg(r.status);
                         });
-                        // Jumlah Hadir per siswa: total status "Hadir" sesuai filter yang aktif
-                        const jumlahHadirSiswaWg = recordsSiswaIniWg.filter(r => r.status === 'Hadir').length;
+                        // Jumlah per status untuk siswa ini, sesuai filter yang aktif
+                        let jH = 0, jT = 0, jD = 0, jS = 0, jI = 0, jB = 0, jPC = 0, jIT = 0;
+                        recordsSiswaIniWg.forEach(r => {
+                            if (r.status === 'Hadir') jH++;
+                            else if (r.status === 'Terlambat') jT++;
+                            else if (r.status === 'Dispen') jD++;
+                            else if (r.status === 'Sakit') jS++;
+                            else if (r.status === 'Izin') jI++;
+                            else if (r.status === 'Bolos') jB++;
+                            else if (r.status.startsWith('Pulang Cepat')) jPC++;
+                            else if (r.status === 'Izin Terlambat') jIT++;
+                        });
 
                         const selTanggalHTML = tanggalUnikWg.length
                             ? tanggalUnikWg.map(t => {
@@ -4317,6 +4364,17 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                               }).join('')
                             : '<td class="py-2 px-1.5 text-center text-slate-300">-</td>';
 
+                        const jumlahHTMLWg = `
+                            <td class="py-3 px-1 text-center font-extrabold text-emerald-600">${jH}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-yellow-600">${jT}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-blue-600">${jD}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-amber-600">${jS}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-purple-600">${jI}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-red-600">${jB}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-orange-600">${jPC}</td>
+                            <td class="py-3 px-1 text-center font-extrabold text-cyan-600">${jIT}</td>
+                        `;
+
                         tbodyWg.innerHTML += `
                             <tr class="border-b border-slate-100 hover:bg-slate-50/50 text-xs">
                                 <td class="py-3 text-center text-slate-500 font-semibold sikat-sticky-no">${idx + 1}</td>
@@ -4325,13 +4383,13 @@ untuk Efisiensi & Integrasi SMAN 1 Parung</p>
                                     <div class="text-[9px] text-slate-400 font-medium">NIS: ${s.nis}</div>
                                 </td>
                                 ${selTanggalHTML}
-                                <td class="py-3 px-1.5 text-center font-extrabold text-emerald-600">${jumlahHadirSiswaWg}</td>
+                                ${jumlahHTMLWg}
                             </tr>
                         `;
                     });
 
                     if (siswaBinaanDisplayWg.length === 0) {
-                        tbodyWg.innerHTML = `<tr><td colspan="${(tanggalUnikWg.length || 1) + 3}" class="py-6 text-center text-slate-400 text-xs">Tidak ada data absensi sesuai filter.</td></tr>`;
+                        tbodyWg.innerHTML = `<tr><td colspan="${(tanggalUnikWg.length || 1) + 10}" class="py-6 text-center text-slate-400 text-xs">Tidak ada data absensi sesuai filter.</td></tr>`;
                     }
 
                     document.getElementById('wgTotalHadir').textContent = totalHadir;
